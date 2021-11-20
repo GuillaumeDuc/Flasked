@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 1191816}
   - component: {fileID: 1191817}
   - component: {fileID: 1191815}
+  - component: {fileID: 1191818}
   m_Layer: 0
   m_Name: flask (2)
   m_TagString: Untagged
@@ -228,6 +229,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &1191818
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191814}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &12719517
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,6 +419,7 @@ GameObject:
   - component: {fileID: 153536175}
   - component: {fileID: 153536176}
   - component: {fileID: 153536174}
+  - component: {fileID: 153536177}
   m_Layer: 0
   m_Name: flask (4)
   m_TagString: Untagged
@@ -499,6 +514,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &153536177
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 153536173}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &168101820
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,6 +621,7 @@ GameObject:
   - component: {fileID: 185667065}
   - component: {fileID: 185667066}
   - component: {fileID: 185667064}
+  - component: {fileID: 185667067}
   m_Layer: 0
   m_Name: flask (7)
   m_TagString: Untagged
@@ -687,6 +716,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &185667067
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185667063}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &261999683
 GameObject:
   m_ObjectHideFlags: 0
@@ -891,7 +933,6 @@ MonoBehaviour:
   - {fileID: 1854178982}
   - {fileID: 2132285338}
   - {fileID: 185667064}
-  text: {fileID: 1999180118}
 --- !u!4 &295747200
 Transform:
   m_ObjectHideFlags: 0
@@ -917,6 +958,7 @@ GameObject:
   - component: {fileID: 313370374}
   - component: {fileID: 313370375}
   - component: {fileID: 313370373}
+  - component: {fileID: 313370376}
   m_Layer: 0
   m_Name: flask (1)
   m_TagString: Untagged
@@ -1011,6 +1053,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &313370376
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313370372}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &396531217
 GameObject:
   m_ObjectHideFlags: 0
@@ -1499,8 +1554,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_Children:
-  - {fileID: 1999180119}
+  m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2350,6 +2404,7 @@ GameObject:
   - component: {fileID: 1324892398}
   - component: {fileID: 1324892397}
   - component: {fileID: 1324892399}
+  - component: {fileID: 1324892400}
   m_Layer: 0
   m_Name: flask
   m_TagString: Untagged
@@ -2444,6 +2499,19 @@ MonoBehaviour:
   - {fileID: 1453861878}
   - {fileID: 2049959109}
   - {fileID: 396531217}
+--- !u!65 &1324892400
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324892396}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1329937320
 GameObject:
   m_ObjectHideFlags: 0
@@ -3036,6 +3104,7 @@ GameObject:
   - component: {fileID: 1677800967}
   - component: {fileID: 1677800968}
   - component: {fileID: 1677800966}
+  - component: {fileID: 1677800969}
   m_Layer: 0
   m_Name: flask (3)
   m_TagString: Untagged
@@ -3130,6 +3199,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &1677800969
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1677800965}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1684583701
 GameObject:
   m_ObjectHideFlags: 0
@@ -3224,6 +3306,7 @@ GameObject:
   - component: {fileID: 1854178983}
   - component: {fileID: 1854178984}
   - component: {fileID: 1854178982}
+  - component: {fileID: 1854178985}
   m_Layer: 0
   m_Name: flask (5)
   m_TagString: Untagged
@@ -3318,6 +3401,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &1854178985
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1854178981}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1938162914
 GameObject:
   m_ObjectHideFlags: 0
@@ -3401,85 +3497,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &1999180118
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1999180119}
-  - component: {fileID: 1999180121}
-  - component: {fileID: 1999180120}
-  m_Layer: 5
-  m_Name: Text
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &1999180119
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999180118}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 658251472}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 816.2, y: 381.2}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1999180120
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999180118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 147
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 1
-    m_MaxSize: 147
-    m_Alignment: 4
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: Lila la plus belle
---- !u!222 &1999180121
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999180118}
-  m_CullTransparentMesh: 1
 --- !u!1 &2031484907
 GameObject:
   m_ObjectHideFlags: 0
@@ -3823,6 +3840,7 @@ GameObject:
   - component: {fileID: 2132285339}
   - component: {fileID: 2132285340}
   - component: {fileID: 2132285338}
+  - component: {fileID: 2132285341}
   m_Layer: 0
   m_Name: flask (6)
   m_TagString: Untagged
@@ -3917,6 +3935,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &2132285341
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2132285337}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.47, y: 4.34, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2144003872
 GameObject:
   m_ObjectHideFlags: 0

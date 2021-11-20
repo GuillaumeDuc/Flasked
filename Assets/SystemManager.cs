@@ -5,8 +5,8 @@ using UnityEngine;
 public class SystemManager : MonoBehaviour
 {
     public List<Flask> flasks = new List<Flask>();
-    public GameObject text;
     private List<Color> colors;
+    private Flask selectedFlask;
     void Start()
     {
         // Initialize colors
@@ -29,6 +29,33 @@ public class SystemManager : MonoBehaviour
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
-            text.SetActive(true);
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                Flask clickedFlask = hit.transform.gameObject.GetComponent<Flask>();
+                if (clickedFlask != null)
+                {
+                    if (!clickedFlask.Equals(selectedFlask))
+                    {
+                        clickedFlask.SetSelected();
+                    }
+                    selectedFlask?.SetUnselected();
+                }
+                else
+                {
+                    selectedFlask?.SetUnselected();
+                }
+                // If clicked on the same flask two times, unselect
+                selectedFlask = clickedFlask.Equals(selectedFlask) ? null : clickedFlask;
+            }
+            else
+            { // No object selected, unselect
+                selectedFlask?.SetUnselected();
+                selectedFlask = null;
+            }
+        }
     }
 }

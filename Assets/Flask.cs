@@ -5,9 +5,11 @@ using UnityEngine;
 public class Flask : MonoBehaviour
 {
     public GameObject[] contentFlask;
+    public float selectedPositionHeight = .5f;
 
     private int maxSize = 4;
     private List<Color> colors = new List<Color>();
+    private bool selected = false;
 
     public void AddColor(Color color)
     {
@@ -31,5 +33,28 @@ public class Flask : MonoBehaviour
             return color;
         }
         return null;
+    }
+
+    public void SetSelected()
+    {
+        if (!selected)
+        {
+            gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + selectedPositionHeight);
+            selected = true;
+        }
+    }
+
+    public void SetUnselected()
+    {
+        if (selected)
+        {
+            gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - selectedPositionHeight);
+            selected = false;
+        }
+    }
+
+    void Start()
+    {
+
     }
 }
