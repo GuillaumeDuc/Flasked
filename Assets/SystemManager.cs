@@ -26,6 +26,16 @@ public class SystemManager : MonoBehaviour
         });
     }
 
+    bool SpillBottle(Flask giver, Flask receiver)
+    {
+        bool spilled = false;
+        if (giver != null && receiver != null && !giver.Equals(receiver))
+        {
+            spilled = giver.SpillTo(receiver);
+        }
+        return spilled;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -36,20 +46,38 @@ public class SystemManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit, 100))
             {
                 Flask clickedFlask = hit.transform.gameObject.GetComponent<Flask>();
+                bool spilled = false;
+                // GameObject clicked is flask
                 if (clickedFlask != null)
                 {
                     if (!clickedFlask.Equals(selectedFlask))
                     {
-                        clickedFlask.SetSelected();
+                        // Clicked flask, try to spill
+                        spilled = SpillBottle(selectedFlask, clickedFlask);
+                        // If not spilled, select
+                        if (!spilled)
+                        {
+                            clickedFlask.SetSelected();
+                        }
                     }
                     selectedFlask?.SetUnselected();
                 }
-                else
+                else // GameObject clicked is not flask
                 {
                     selectedFlask?.SetUnselected();
+                    selectedFlask = null;
                 }
+                // Change selected flask to new clicked flask
                 // If clicked on the same flask two times, unselect
-                selectedFlask = clickedFlask.Equals(selectedFlask) ? null : clickedFlask;
+                // If spilled, unselect
+                if (spilled || clickedFlask.Equals(selectedFlask))
+                {
+                    selectedFlask = null;
+                }
+                else
+                {
+                    selectedFlask = clickedFlask;
+                }
             }
             else
             { // No object selected, unselect

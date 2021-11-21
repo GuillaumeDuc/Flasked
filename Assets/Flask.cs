@@ -22,17 +22,35 @@ public class Flask : MonoBehaviour
         }
     }
 
-    public Color? PopColor()
+    public List<Color> PopColors()
     {
+        List<Color> popedColors = new List<Color>();
         if (colors.Count > 0)
         {
-            Color color = colors[colors.Count - 1];
-            GameObject content = contentFlask[colors.Count];
-            content.SetActive(false);
-            colors.RemoveAt(colors.Count - 1);
-            return color;
+            bool sameColor;
+            int i = colors.Count - 1;
+            do
+            {
+                Color color = colors[i];
+                popedColors.Add(color);
+                // Next color is same color
+                sameColor = i - 1 >= 0 && colors[i - 1].Equals(color);
+                i--;
+            } while (sameColor);
         }
-        return null;
+        return popedColors;
+    }
+
+    void RemoveColors(int nbColors)
+    {
+        int size = colors.Count - 1;
+        int stop = colors.Count - nbColors;
+        for (int i = size; i >= stop; i--)
+        {
+            GameObject content = contentFlask[i];
+            content.SetActive(false);
+            colors.RemoveAt(i);
+        }
     }
 
     public void SetSelected()
@@ -41,6 +59,7 @@ public class Flask : MonoBehaviour
         {
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + selectedPositionHeight);
             selected = true;
+            Debug.Log(colors.Count);
         }
     }
 
@@ -51,6 +70,34 @@ public class Flask : MonoBehaviour
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - selectedPositionHeight);
             selected = false;
         }
+    }
+
+    public bool SpillTo(Flask flask)
+    {
+        List<Color> colorsToSpill = this.PopColors();
+        if (CanSpillTo(flask, colorsToSpill))
+        {
+            RemoveColors(colorsToSpill.Count);
+            colorsToSpill.ForEach(color => { flask.AddColor(color); });
+            return true;
+        }
+        return false;
+    }
+
+    private bool CanSpillTo(Flask flask, List<Color> colorSpill)
+    {
+        int size = flask.GetColors().Count + colorSpill.Count;
+        return flask.maxSize >= size;
+    }
+
+    public List<Color> GetColors()
+    {
+        return colors;
+    }
+
+    public int GetMaxSize()
+    {
+        return maxSize;
     }
 
     void Start()
