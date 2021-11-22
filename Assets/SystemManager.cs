@@ -19,20 +19,17 @@ public class SystemManager : MonoBehaviour
         // Initialize all flask
         flasks.ForEach(flask =>
         {
-            for (int i = 0; i < Random.Range(1, 4); i++)
+            flask.InitFlask();
+            for (int i = 0; i < Random.Range(0, 5); i++)
             {
-                flask.AddColor(colors[Random.Range(1, 4)]);
+                flask.AddColor(colors[Random.Range(0, 4)]);
             }
         });
     }
 
     bool SpillBottle(Flask giver, Flask receiver)
     {
-        bool spilled = false;
-        if (giver != null && receiver != null && !giver.Equals(receiver))
-        {
-            spilled = giver.SpillTo(receiver);
-        }
+        bool spilled = (giver != null) ? giver.SpillTo(receiver) : false;
         return spilled;
     }
 
