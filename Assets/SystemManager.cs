@@ -16,15 +16,18 @@ public class SystemManager : MonoBehaviour
             Color.green,
             Color.yellow,
         };
-        // Initialize all flask
-        flasks.ForEach(flask =>
+        for (int i = 0; i < flasks.Count; i++)
         {
-            flask.InitFlask();
-            for (int i = 0; i < Random.Range(0, 5); i++)
+            flasks[i].InitFlask();
+            // Initialize all flask besides last one
+            if (i < flasks.Count - 1)
             {
-                flask.AddColor(colors[Random.Range(0, 4)]);
+                for (int j = 0; j < Random.Range(3, 5); j++)
+                {
+                    flasks[i].AddColor(colors[Random.Range(0, 4)]);
+                }
             }
-        });
+        }
     }
 
     bool SpillBottle(Flask giver, Flask receiver)

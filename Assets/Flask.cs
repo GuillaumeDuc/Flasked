@@ -7,7 +7,7 @@ public class Flask : MonoBehaviour
     public Material material;
 
     private int maxSize = 4;
-    private List<GameObject> contentFlask = new List<GameObject>();
+    private List<ContentFlask> contentFlask = new List<ContentFlask>();
     private List<Color> colors = new List<Color>();
     private bool selected = false;
     private AnimFlask animFlask;
@@ -19,10 +19,8 @@ public class Flask : MonoBehaviour
             // Color match mesh index
             colors.Add(color);
             // Mesh
-            GameObject content = contentFlask[colors.Count - 1];
-            Debug.Log(content);
-            content.SetActive(true);
-            content.GetComponent<MeshRenderer>().material.SetColor("_color", color);
+            ContentFlask content = contentFlask[colors.Count - 1];
+            content.SetColor(color);
         }
     }
 
@@ -51,8 +49,8 @@ public class Flask : MonoBehaviour
         int stop = colors.Count - nbColors;
         for (int i = size; i >= stop; i--)
         {
-            GameObject content = contentFlask[i];
-            content.SetActive(false);
+            ContentFlask content = contentFlask[i];
+            content.RemoveColor();
             colors.RemoveAt(i);
         }
     }
@@ -105,15 +103,10 @@ public class Flask : MonoBehaviour
         {
             RemoveColors(colorsToSpill.Count);
             colorsToSpill.ForEach(color => { flask.AddColor(color); });
-            AnimateFlask(flask);
+            animFlask.SpillAnimation(flask);
             return true;
         }
         return false;
-    }
-
-    void AnimateFlask(Flask flask)
-    {
-        animFlask.SpillAnimation(flask);
     }
 
     public List<Color> GetColors()
@@ -124,6 +117,11 @@ public class Flask : MonoBehaviour
     public int GetMaxSize()
     {
         return maxSize;
+    }
+
+    public List<ContentFlask> GetContentFlask()
+    {
+        return contentFlask;
     }
 
     void CreateContent()
@@ -146,68 +144,24 @@ public class Flask : MonoBehaviour
             new Vector2(.5f, .5f),
             new Vector2(.5f, -.5f)
         };
-        GameObject firstContent = CreateMesh(bottomList, -1.5f);
-        GameObject secondContent = CreateMesh(squareList, -.5f);
-        GameObject thirdContent = CreateMesh(squareList, .5f);
-        GameObject fourthContent = CreateMesh(squareList, 1.5f);
-        contentFlask.AddRange(new List<GameObject>() { firstContent, secondContent, thirdContent, fourthContent });
+        ContentFlask firstContent = CreateContentFlask(bottomList, -1.5f, ContentFlask.ContentType.Bottom);
+        contentFlask.Add(firstContent);
+        float y = -.5f;
+        for (int i = 1; i < maxSize; i++)
+        {
+            contentFlask.Add(CreateContentFlask(squareList, y));
+            y += 1f;
+        }
     }
 
-    GameObject CreateMesh(List<Vector2> listVertices, float positionY)
+    ContentFlask CreateContentFlask(List<Vector2> listVertices, float positionY, ContentFlask.ContentType type = ContentFlask.ContentType.Default)
     {
-        Vector2[] list = listVertices.ToArray();
-        // Use the triangulator to get indices for creating triangles
-        Triangulator tr = new Triangulator(list);
-        int[] indices = tr.Triangulate();
-
-        // Create the Vector3 vertices
-        Vector3[] vertices = new Vector3[list.Length];
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] = new Vector3(list[i].x, list[i].y);
-        }
-
-        // Create the mesh
-        Mesh msh = new Mesh();
-        msh.vertices = vertices;
-        msh.triangles = indices;
-        msh.RecalculateNormals();
-        msh.RecalculateBounds();
-
-        // Set up game object with mesh;
+        // Set up game object with mesh
         GameObject meshObj = new GameObject("content");
         meshObj.transform.parent = gameObject.transform;
-        meshObj.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + positionY);
-        meshObj.AddComponent(typeof(MeshRenderer));
-        MeshFilter filter = meshObj.AddComponent(typeof(MeshFilter)) as MeshFilter;
-        filter.mesh = msh;
-        Renderer renderer = meshObj.GetComponent<MeshRenderer>();
-        Material mat = new Material(material);
-        renderer.material = mat;
-        meshObj.SetActive(false);
-        return meshObj;
-    }
-
-    void MoveContent()
-    {
-        Mesh mesh = contentFlask[0].GetComponent<MeshFilter>().mesh;
-        Vector3[] vertices = mesh.vertices;
-        Vector2[] indices = new Vector2[vertices.Length];
-        Vector2[] uv = new Vector2[vertices.Length];
-
-        for (var i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] += vertices[i] * 1.5f;
-            indices[i] = new Vector2(vertices[i].x, vertices[i].y);
-            uv[i] = vertices[i];
-        }
-
-        mesh.Clear();
-        mesh.vertices = vertices;
-        Triangulator tr = new Triangulator(indices);
-        mesh.triangles = tr.Triangulate();
-        mesh.RecalculateNormals();
-        mesh.uv = uv;
+        ContentFlask content = meshObj.AddComponent<ContentFlask>();
+        content.InitContentFlask(material, listVertices, positionY, type);
+        return content;
     }
 
     public void InitFlask()
