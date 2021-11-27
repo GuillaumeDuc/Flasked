@@ -24,6 +24,18 @@ public class Flask : MonoBehaviour
         }
     }
 
+    public void InitColor(Color color)
+    {
+        if (colors.Count < maxSize)
+        {
+            // Color match mesh index
+            colors.Add(color);
+            // Mesh
+            ContentFlask content = contentFlask[colors.Count - 1];
+            content.InitColor(color);
+        }
+    }
+
     public List<Color> PopColors()
     {
         List<Color> popedColors = new List<Color>();
@@ -162,6 +174,22 @@ public class Flask : MonoBehaviour
         ContentFlask content = meshObj.AddComponent<ContentFlask>();
         content.InitContentFlask(material, listVertices, positionY, type);
         return content;
+    }
+
+    public ContentFlask GetContentToBeFilled()
+    {
+        return contentFlask.FindLast(currentFlask =>
+        {
+            return currentFlask.fill;
+        });
+    }
+
+    public ContentFlask GetContentToSpill()
+    {
+        return contentFlask.FindLast(currentFlask =>
+        {
+            return currentFlask.spill;
+        });
     }
 
     public void InitFlask()

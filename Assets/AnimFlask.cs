@@ -57,7 +57,8 @@ public class AnimFlask : MonoBehaviour
             // Rotate flask
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / 20f);
             // Rotate Content relative to up position
-            AnimateContentFlask(transform.localRotation.eulerAngles.z, targetFlask);
+            AnimateContentFlask(transform.localRotation.eulerAngles.z);
+            AnimateFillSpillContent(targetFlask, Time.time - startTime);
             yield return 1;
         }
         // Rotate to original position
@@ -72,19 +73,38 @@ public class AnimFlask : MonoBehaviour
             // Rotate flask
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / 20f);
             // Rotate Content and Spill Content
-            AnimateContentFlask(transform.localRotation.eulerAngles.z, targetFlask);
+            AnimateContentFlask(transform.localRotation.eulerAngles.z);
             yield return 1;
         }
         // Move
         StartCoroutine(WaitAndMove(gameObject.transform.position, originalPos));
     }
 
-    void AnimateContentFlask(float eulerAngle, Flask targetFlask)
+    void AnimateContentFlask(float eulerAngle)
     {
         List<ContentFlask> contentFlasks = flask.GetContentFlask();
         for (int i = 0; i < contentFlasks.Count; i++)
         {
-            contentFlasks[i].RotateContent(-WrapAngle(eulerAngle));
+            // Rotate
+            if (!contentFlasks[i].isEmpty())
+            {
+                contentFlasks[i].RotateContent(-WrapAngle(eulerAngle));
+            }
+        }
+    }
+
+    void AnimateFillSpillContent(Flask targetFlask, float time)
+    {
+        ContentFlask contentTarget = targetFlask.GetContentToBeFilled();
+        ContentFlask contentToSpill = flask.GetContentToSpill();
+
+        if (contentTarget != null && contentTarget.fill)
+        {
+            contentTarget.Fill(time);
+        }
+        if (contentToSpill != null && contentToSpill.spill)
+        {
+            contentToSpill?.Spill(time);
         }
     }
 

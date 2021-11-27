@@ -24,7 +24,7 @@ public class SystemManager : MonoBehaviour
             {
                 for (int j = 0; j < Random.Range(3, 5); j++)
                 {
-                    flasks[i].AddColor(colors[Random.Range(0, 4)]);
+                    flasks[i].InitColor(colors[Random.Range(0, 4)]);
                 }
             }
         }
