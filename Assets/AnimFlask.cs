@@ -5,9 +5,14 @@ using UnityEngine;
 public class AnimFlask : MonoBehaviour
 {
     public float selectedPositionHeight = .5f;
+    public float maxAngle = 80f, defaultAngle = 0;
     private Flask flask;
-    private int waitSpillSecond = 2;
+    float spillTime = 5f;
     private Vector3 originalPos;
+    private Flask targetFlask;
+    private Vector3 targetPosition;
+    private bool move = false, rotateTo = false, rotateBack = false, moveBack = false;
+    float startTime;
 
     public void MoveSelected()
     {
@@ -21,91 +26,32 @@ public class AnimFlask : MonoBehaviour
 
     public void SpillAnimation(Flask targetFlask)
     {
-        // Target flask
-        Vector3 target = new Vector3(targetFlask.gameObject.transform.position.x - 2.2f, targetFlask.gameObject.transform.position.y + 2.5f);
-        // MoveToFlask, RotateToSpill, RotateToMove and WaitAndMove
-        StartCoroutine(MoveToFlask(transform.position, target, targetFlask));
-    }
-
-    IEnumerator WaitAndMove(Vector3 from, Vector3 to)
-    {
-        float startTime = Time.time;
-        while (Time.time - startTime <= 1)
-        {
-            transform.position = Vector3.Lerp(from, to, Time.time - startTime);
-            yield return 1;
-        }
-    }
-
-    IEnumerator MoveToFlask(Vector3 from, Vector3 to, Flask targetFlask)
-    {
-        float startTime = Time.time; // Time.time contains current frame time, so remember starting point
-        while (Time.time - startTime <= 1)
-        { // until one second passed
-            transform.position = Vector3.Lerp(from, to, Time.time - startTime); // lerp from A to B in one second
-            yield return 1; // wait for next frame
-        }
-        // Rotate
-        StartCoroutine(RotateToSpill(-80, targetFlask));
-    }
-
-    IEnumerator RotateToSpill(float angle, Flask targetFlask)
-    {
-        float startTime = Time.time;
-        while ((Time.time - startTime) / waitSpillSecond <= 1)
-        {
-            // Rotate flask
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / 20f);
-            // Rotate Content relative to up position
-            AnimateContentFlask(transform.localRotation.eulerAngles.z);
-            AnimateFillSpillContent(targetFlask, Time.time - startTime);
-            yield return 1;
-        }
-        // Rotate to original position
-        StartCoroutine(RotateToMove(0, targetFlask));
-    }
-
-    IEnumerator RotateToMove(float angle, Flask targetFlask)
-    {
-        float startTime = Time.time;
-        while (Time.time - startTime <= 1)
-        {
-            // Rotate flask
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / 20f);
-            // Rotate Content and Spill Content
-            AnimateContentFlask(transform.localRotation.eulerAngles.z);
-            yield return 1;
-        }
-        // Move
-        StartCoroutine(WaitAndMove(gameObject.transform.position, originalPos));
+        this.targetFlask = targetFlask;
+        this.targetPosition = new Vector3(targetFlask.gameObject.transform.position.x - 2.2f, targetFlask.gameObject.transform.position.y + 2.5f);
+        startTime = Time.time;
+        move = true;
     }
 
     void AnimateContentFlask(float eulerAngle)
     {
-        List<ContentFlask> contentFlasks = flask.GetContentFlask();
-        for (int i = 0; i < contentFlasks.Count; i++)
+        // Animate all contents in flask
+        flask.GetContentFlask().ForEach(content =>
         {
-            // Rotate
-            if (!contentFlasks[i].isEmpty())
-            {
-                contentFlasks[i].RotateContent(-WrapAngle(eulerAngle));
-            }
-        }
+            content.UpdateContent();
+        });
     }
 
     void AnimateFillSpillContent(Flask targetFlask, float time)
     {
-        ContentFlask contentTarget = targetFlask.GetContentToBeFilled();
-        ContentFlask contentToSpill = flask.GetContentToSpill();
+    }
 
-        if (contentTarget != null && contentTarget.fill)
-        {
-            contentTarget.Fill(time);
-        }
-        if (contentToSpill != null && contentToSpill.spill)
-        {
-            contentToSpill?.Spill(time);
-        }
+    private void rotate(float angle)
+    {
+        // Rotate flask
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / spillTime);
+        // Rotate Content relative to up position
+        AnimateContentFlask(transform.localRotation.eulerAngles.z);
+        AnimateFillSpillContent(targetFlask, Time.deltaTime);
     }
 
     private static float WrapAngle(float angle)
@@ -121,5 +67,50 @@ public class AnimFlask : MonoBehaviour
     {
         flask = gameObject.GetComponent<Flask>();
         originalPos = transform.position;
+    }
+
+    void Update()
+    {
+        // Move to target, rotate left, rotate back, move to original position
+        if (move)
+        {
+            transform.position = Vector3.Lerp(originalPos, targetPosition, Time.time - startTime);
+
+            if (transform.position == targetPosition)
+            {
+                startTime = Time.time;
+                rotateTo = true;
+                move = false;
+            }
+        }
+        if (rotateTo)
+        {
+            rotate(-80);
+            if (WrapAngle(transform.localRotation.eulerAngles.z) == -80)
+            {
+                startTime = Time.time;
+                rotateTo = false;
+                rotateBack = true;
+            }
+        }
+        if (rotateBack)
+        {
+            rotate(0);
+            if (WrapAngle(transform.localRotation.eulerAngles.z) <= .01f && WrapAngle(transform.localRotation.eulerAngles.z) >= -.01f)
+            {
+                startTime = Time.time;
+                rotateBack = false;
+                moveBack = true;
+            }
+        }
+        if (moveBack)
+        {
+            transform.position = Vector3.Lerp(targetPosition, originalPos, Time.time - startTime);
+            if (transform.position == originalPos)
+            {
+                startTime = Time.time;
+                moveBack = false;
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@ public class Flask : MonoBehaviour
     public Material material;
 
     private int maxSize = 4;
+    public int height = 1;
+    public int nbPoints = 20;
     private List<ContentFlask> contentFlask = new List<ContentFlask>();
     private List<Color> colors = new List<Color>();
     private bool selected = false;
@@ -16,23 +18,12 @@ public class Flask : MonoBehaviour
     {
         if (colors.Count < maxSize)
         {
-            // Color match mesh index
-            colors.Add(color);
             // Mesh
-            ContentFlask content = contentFlask[colors.Count - 1];
+            ContentFlask content = CreateContentFlask(.1f, height, material, nbPoints);
+            contentFlask.Add(content);
             content.SetColor(color);
-        }
-    }
-
-    public void InitColor(Color color)
-    {
-        if (colors.Count < maxSize)
-        {
             // Color match mesh index
             colors.Add(color);
-            // Mesh
-            ContentFlask content = contentFlask[colors.Count - 1];
-            content.InitColor(color);
         }
     }
 
@@ -136,45 +127,14 @@ public class Flask : MonoBehaviour
         return contentFlask;
     }
 
-    void CreateContent()
+    ContentFlask CreateContentFlask(float width, float height, Material material, int nbPoints)
     {
-        List<Vector2> bottomList = new List<Vector2>() {
-            new Vector2(-.55f, -.3f),
-            new Vector2(-.55f, .5f),
-            new Vector2(.5f, .5f),
-            new Vector2(.5f, -.3f),
-            // Quarter Circle
-            new Vector2(.4f, -.4f),
-            new Vector2(.25f, -.5f),
-            new Vector2(0f, -.53f),
-            new Vector2(-.3f, -.5f),
-            new Vector2(-.425f, -.4f),
-        };
-        List<Vector2> squareList = new List<Vector2>() {
-            new Vector2(-.55f, -.5f),
-            new Vector2(-.55f, .5f),
-            new Vector2(.5f, .5f),
-            new Vector2(.5f, -.5f)
-        };
-        ContentFlask firstContent = CreateContentFlask(bottomList, -1.5f, ContentFlask.ContentType.Bottom);
-        contentFlask.Add(firstContent);
-        float y = -.5f;
-        for (int i = 1; i < maxSize; i++)
-        {
-            contentFlask.Add(CreateContentFlask(squareList, y));
-            y += 1f;
-        }
-    }
-
-    ContentFlask CreateContentFlask(List<Vector2> listVertices, float positionY, ContentFlask.ContentType type = ContentFlask.ContentType.Default)
-    {
-        // Set up game object with mesh
-        GameObject meshObj = new GameObject("content");
-        meshObj.transform.parent = gameObject.transform;
-        ContentFlask content = meshObj.AddComponent<ContentFlask>();
-        content.InitContentFlask(material, listVertices, positionY, type);
+        // Find Container
+        Container container = GetComponentInChildren<Container>();
+        ContentFlask content = container.AddContentFlask(.1f, height, material, nbPoints);
         return content;
     }
+    /*
 
     public ContentFlask GetContentToBeFilled()
     {
@@ -190,11 +150,10 @@ public class Flask : MonoBehaviour
         {
             return currentFlask.spill;
         });
-    }
+    }*/
 
     public void InitFlask()
     {
         animFlask = gameObject.GetComponent<AnimFlask>();
-        CreateContent();
     }
 }
