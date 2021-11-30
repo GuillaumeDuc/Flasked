@@ -1,20 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Flask : MonoBehaviour
 {
     public Material material;
 
     private int maxSize = 4;
-    public int height = 1;
+    public int contentHeight = 1;
     public int nbPoints = 20;
     private List<ContentFlask> contentFlask = new List<ContentFlask>();
     private List<Color> colors = new List<Color>();
     private bool selected = false;
     private AnimFlask animFlask;
 
-    public void AddColor(Color color)
+    public void AddColor(Color color, float height)
     {
         if (colors.Count < maxSize)
         {
@@ -52,8 +53,6 @@ public class Flask : MonoBehaviour
         int stop = colors.Count - nbColors;
         for (int i = size; i >= stop; i--)
         {
-            ContentFlask content = contentFlask[i];
-            content.RemoveColor();
             colors.RemoveAt(i);
         }
     }
@@ -104,9 +103,11 @@ public class Flask : MonoBehaviour
         // Spill only when not in own flask, if flask is not null, if space is enough, if both top color match
         if (!this.Equals(flask) && flask != null && HasEnoughSpace(flask, colorsToSpill) && EqualsTopColor(flask))
         {
+            // target Flask, number colors, index colors, index target flask contents
+            int indexContent = flask.GetContentFlask().Count > 0 ? flask.GetContentFlask().Count - 1 : 0;
+            animFlask.SpillAnimation(flask, colorsToSpill.Count, colors.Count - 1, indexContent);
             RemoveColors(colorsToSpill.Count);
-            colorsToSpill.ForEach(color => { flask.AddColor(color); });
-            animFlask.SpillAnimation(flask);
+            colorsToSpill.ForEach(color => { flask.GetColors().Add(color); });
             return true;
         }
         return false;
@@ -127,30 +128,19 @@ public class Flask : MonoBehaviour
         return contentFlask;
     }
 
-    ContentFlask CreateContentFlask(float width, float height, Material material, int nbPoints)
+    public void RemoveContentFlask(ContentFlask content)
+    {
+        contentFlask.RemoveAt(contentFlask.Count() - 1);
+        Destroy(content.gameObject);
+    }
+
+    public ContentFlask CreateContentFlask(float width, float height, Material material, int nbPoints)
     {
         // Find Container
         Container container = GetComponentInChildren<Container>();
         ContentFlask content = container.AddContentFlask(.1f, height, material, nbPoints);
         return content;
     }
-    /*
-
-    public ContentFlask GetContentToBeFilled()
-    {
-        return contentFlask.FindLast(currentFlask =>
-        {
-            return currentFlask.fill;
-        });
-    }
-
-    public ContentFlask GetContentToSpill()
-    {
-        return contentFlask.FindLast(currentFlask =>
-        {
-            return currentFlask.spill;
-        });
-    }*/
 
     public void InitFlask()
     {

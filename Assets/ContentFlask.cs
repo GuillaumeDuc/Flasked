@@ -5,8 +5,9 @@ using System.Linq;
 
 public class ContentFlask : MonoBehaviour
 {
-    int nbPoints;
-    float height;
+    private int nbPoints;
+    public float height;
+    private bool spill;
 
     public void SetColor(Color color)
     {
@@ -14,34 +15,51 @@ public class ContentFlask : MonoBehaviour
         gameObject.GetComponent<MeshRenderer>().material.SetColor("_color", color);
     }
 
-    public void RemoveColor()
+    public Material GetMaterial()
     {
-        // Start spilling
+        return gameObject.GetComponent<MeshRenderer>().material;
     }
 
-    public void UpdateContent()
+    public void SetHeight(float height)
     {
+        this.height = height;
+    }
+
+    public void UpdateContent(float eulerAngle)
+    {
+        // Collider
+        EdgeCollider2D edge = GetComponent<EdgeCollider2D>();
+
         Mesh mesh = GetComponent<MeshFilter>().mesh;
         Vector2[] list = GetListSquare(.01f, height, GetOrigin(), nbPoints);
-        // Use the triangulator to get indices for creating triangles
-        Triangulator tr = new Triangulator(list);
-        int[] indices = tr.Triangulate();
+        Vector2[] uv = new Vector2[list.Length];
 
         // Create the Vector3 vertices
         Vector3[] vertices = new Vector3[list.Length];
         for (int i = 0; i < vertices.Length; i++)
         {
+            list[i] = Quaternion.Euler(0, 0, -eulerAngle) * list[i];
             vertices[i] = new Vector3(list[i].x, list[i].y);
+            uv[i] = vertices[i];
         }
 
+        // Use the triangulator to get indices for creating triangles
+        Triangulator tr = new Triangulator(list);
+        int[] indices = tr.Triangulate();
         // Update mesh
         mesh.Clear();
+        MeshFilter filter = gameObject.GetComponent<MeshFilter>();
+        filter.mesh = mesh;
         mesh.vertices = vertices;
         mesh.triangles = indices;
+        mesh.uv = uv;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-        gameObject.GetComponent<EdgeCollider2D>().points = list;
+        if (edge != null)
+        {
+            edge.SetPoints(new List<Vector2>(list));
+        }
     }
 
     Vector2 GetOrigin()
@@ -52,6 +70,7 @@ public class ContentFlask : MonoBehaviour
     public GameObject CreateContentFlask(float width, float height, Vector2 origin, Material material, int nbPoints)
     {
         this.height = height;
+        this.nbPoints = nbPoints;
         return GenerateMesh(GetListSquare(width, height, origin, nbPoints), origin, material);
     }
 
@@ -91,14 +110,16 @@ public class ContentFlask : MonoBehaviour
 
     Vector2[] StretchVectors(Vector2[] points, Vector2 direction, Vector2 origin)
     {
+        int layerMask = 1 << 6;
+        layerMask = ~layerMask;
+
         Vector2[] res = new Vector2[points.Length];
         for (int i = 0; i < points.Length; i++)
         {
             Vector2 transformedPoint = points[i] + origin;
-            RaycastHit2D hit = Physics2D.Raycast(transformedPoint, direction);
+            RaycastHit2D hit = Physics2D.Raycast(transformedPoint, direction, 100, layerMask);
             if (hit.collider != null)
             {
-
                 res[i] = res[i] + (hit.point - origin);
             }
         }
@@ -137,5 +158,4 @@ public class ContentFlask : MonoBehaviour
         renderer.material = mat;
         return gameObject;
     }
-
 }
