@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ContentMat
-  m_Shader: {fileID: -6465566751694194690, guid: 92dd91796b038184694da5aa3583bf68, type: 3}
+  m_Name: GreenContentMat
+  m_Shader: {fileID: -6465566751694194690, guid: 6f2f422bcd39183449e4ca6fa2351e8a, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,7 +19,7 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _SampleTexture2D_82da6fcea8414ea2a13653389a190b98_Texture_1:
+    - _SampleTexture2D_48a132b052f04ccba43ad6a0fb781dd2_Texture_1:
         m_Texture: {fileID: 10307, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -36,8 +36,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _Alpha: 0.51
+    - _Intensity: 5.29
+    - _InteriorIntensity: 6.01
+    - _RippleIntensity: 1.74
+    - _RippleSpeed: 0.35
+    - _Slimness: 1
     m_Colors:
-    - _Color: {r: 0.8396226, g: 0.64617044, b: 0.5663492, a: 1}
-    - _color: {r: 0.7490196, g: 0.043137256, b: 0, a: 1}
+    - _Color: {r: 0, g: 1, b: 0, a: 0}
+    - _RippleColor: {r: 0.7241852, g: 2.4266565, b: 0, a: 0}
   m_BuildTextureStacks: []

@@ -144,6 +144,7 @@ public class ContentFlask : MonoBehaviour
         Mesh msh = new Mesh();
         msh.vertices = vertices;
         msh.triangles = indices;
+        msh.uv = listVertices;
         msh.RecalculateNormals();
         msh.RecalculateBounds();
 
