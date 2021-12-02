@@ -37,13 +37,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.51
+    - _Alpha: 1
     - _Intensity: 5.29
-    - _InteriorIntensity: 6.01
-    - _RippleIntensity: 1.74
-    - _RippleSpeed: 0.35
-    - _Slimness: 1
+    - _InteriorIntensity: 8.07
+    - _RippleIntensity: 2.68
+    - _RippleSpeed: 0.89
+    - _Slimness: 5.99
     m_Colors:
-    - _Color: {r: 0, g: 1, b: 0, a: 0}
-    - _RippleColor: {r: 0.7241852, g: 2.4266565, b: 0, a: 0}
+    - _Color: {r: 0, g: 0.3962264, b: 0, a: 0}
+    - _RippleColor: {r: 0.59607846, g: 2, b: 0, a: 0}
   m_BuildTextureStacks: []

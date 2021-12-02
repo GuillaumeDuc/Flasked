@@ -11,8 +11,8 @@ public class AnimFlask : MonoBehaviour
     private Vector3 originalPos;
     private Flask targetFlask;
     private Vector3 targetPosition;
-    private int count, index, indexContent, countContent, maxCount;
-    private bool move = false, rotateTo = false, rotateBack = false, moveBack = false;
+    private bool move = false, rotateTo = false, rotateBack = false, moveBack = false, spill = false;
+    private float startHeight;
     float startTime;
 
     public void MoveSelected()
@@ -25,65 +25,63 @@ public class AnimFlask : MonoBehaviour
         gameObject.transform.position = originalPos;
     }
 
-    public void SpillAnimation(Flask targetFlask, int count, int index, int indexContent)
+    public void SpillAnimation(Flask targetFlask)
     {
+        // Init variables
         this.targetFlask = targetFlask;
         this.targetPosition = new Vector3(targetFlask.gameObject.transform.position.x - 2.2f, targetFlask.gameObject.transform.position.y + 2.5f);
+
+        ContentFlask topContent = targetFlask.GetComponentInChildren<Container>().GetTopContent();
+        // Flask filled starting height
+        startHeight = 0;
+        // Flask filled new height
+        if (topContent != null)
+        {
+            startHeight = topContent.height;
+            topContent.height += flask.GetComponentInChildren<Container>().GetTopContent().height;
+        }
+
         startTime = Time.time;
-        this.count = count;
-        this.index = index;
-        this.indexContent = indexContent;
-        this.countContent = 0;
-        this.maxCount = count;
+        // Start animation
         move = true;
+
     }
 
     void UpdateContents(Flask targetFlask)
     {
         // Animate all contents in flasks
-        flask.GetContentFlask().ForEach(content =>
-        {
-            content.UpdateContent(transform.localRotation.eulerAngles.z);
-        });
-        targetFlask.GetContentFlask().ForEach(content =>
-        {
-            content.UpdateContent(targetFlask.transform.localRotation.eulerAngles.z);
-        });
+        GetComponentInChildren<Container>().UpdateContents(transform.localRotation.eulerAngles.z);
+        targetFlask.GetComponentInChildren<Container>().UpdateContents(targetFlask.transform.localRotation.eulerAngles.z);
     }
 
     void AnimateFillSpillContent(Flask targetFlask, float time)
     {
-        ContentFlask contentFlask = flask.GetContentFlask()[index];
+        ContentFlask contentFlask = flask.GetComponentInChildren<Container>().GetTopContent();
         // Spill Top
-        if (contentFlask.height >= 0.01f)
+        if (contentFlask != null && contentFlask.currentHeight >= 0.01f && spill)
         {
-            contentFlask.SetHeight((1 - time) * flask.contentHeight);
+            contentFlask.SetCurrentHeight((1 - time) * contentFlask.height);
         }
-        else // Spill next content
+        else if (contentFlask != null && spill) // end
         {
-            startTime = Time.time;
-            flask.RemoveContentFlask(contentFlask);
-            index--;
-            count--;
+            spill = false;
+            Destroy(GetComponentInChildren<Container>().GetTopContent().gameObject);
         }
 
-        // If empty, create content
+        // Target flask
         Container container = targetFlask.GetComponentInChildren<Container>();
-        ContentFlask targetContentFlask = container.GetContentAt(indexContent + countContent);
-        if (targetContentFlask == null)
+        ContentFlask targetContentFlask = container.GetTopContent();
+        // Create content if empty
+        if (targetContentFlask == null && spill)
         {
-            targetContentFlask = targetFlask.CreateContentFlask(.1f, 0, contentFlask.GetMaterial(), targetFlask.nbPoints);
-            targetFlask.GetContentFlask().Add(targetContentFlask);
+            targetContentFlask = container.AddContentFlask(.1f, contentFlask.height, contentFlask.GetColor(), contentFlask.GetMaterial(), flask.nbPoints);
+            targetContentFlask.currentHeight = 0;
+            UpdateContents(targetFlask);
         }
         // Fill Top
-        if (targetContentFlask.height <= .99f)
+        if (spill)
         {
-            targetContentFlask.SetHeight(time * flask.contentHeight);
-        }
-        // Fill Next content
-        else if (countContent < maxCount)
-        {
-            countContent++;
+            targetContentFlask.SetCurrentHeight(startHeight + (time * (targetContentFlask.height - startHeight)));
         }
     }
 
@@ -92,10 +90,6 @@ public class AnimFlask : MonoBehaviour
         // Rotate flask
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / spillTime);
         // Rotate Content relative to up position
-        if (count > 0)
-        {
-            AnimateFillSpillContent(targetFlask, time);
-        }
         UpdateContents(targetFlask);
     }
 
@@ -126,12 +120,14 @@ public class AnimFlask : MonoBehaviour
                 startTime = Time.time;
                 rotateTo = true;
                 move = false;
+                spill = true;
             }
         }
         if (rotateTo)
         {
             rotate(rotationAngle, Time.time - startTime);
-            if (WrapAngle(transform.localRotation.eulerAngles.z) == rotationAngle && countContent == maxCount && count == 0)
+            AnimateFillSpillContent(targetFlask, Time.time - startTime);
+            if (WrapAngle(transform.localRotation.eulerAngles.z) == rotationAngle && !spill)
             {
                 startTime = Time.time;
                 rotateTo = false;

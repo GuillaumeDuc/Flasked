@@ -36,7 +36,12 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _RippleIntensity: 30.7
+    - _RippleSpeed: 2.2
+    - _Slimness: 18.5
     m_Colors:
-    - _Color: {r: 0, g: 0.37894556, b: 0.65205944, a: 0}
+    - _Color: {r: 0, g: 0.991025, b: 1, a: 0}
+    - _RippleColor: {r: 766.9961, g: 766.9961, b: 766.9961, a: 0}
+    - _color: {r: 0, g: 0.5518586, b: 0.9528302, a: 0}
   m_BuildTextureStacks: []

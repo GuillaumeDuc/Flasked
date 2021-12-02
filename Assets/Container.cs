@@ -4,9 +4,17 @@ using UnityEngine;
 
 public class Container : MonoBehaviour
 {
-    public ContentFlask AddContentFlask(float width, float height, Material material, int nbPoints)
+    public ContentFlask AddContentFlask(float width, float height, Color color, Material material, int nbPoints)
     {
-        // Set up game object with mesh
+        // If top content is same color, increase height
+        if (GetTopContent() != null && GetTopContent().HasSameColor(color))
+        {
+            GetTopContent().height += height;
+            GetTopContent().SetCurrentHeight(GetTopContent().height);
+            GetTopContent().UpdateContent();
+            return GetTopContent();
+        }
+        // Set up game object with position
         GameObject meshObj = new GameObject("content");
         meshObj.transform.parent = gameObject.transform;
         meshObj.layer = 6;
@@ -16,7 +24,7 @@ public class Container : MonoBehaviour
         ContentFlask content = meshObj.AddComponent<ContentFlask>();
         if (hit.collider != null)
         {
-            content.CreateContentFlask(width, height, hit.point + new Vector2(0, 0.00001f), material, nbPoints);
+            content.CreateContentFlask(width, height, hit.point + new Vector2(0, 0.00001f), color, material, nbPoints);
         }
         return content;
     }
@@ -31,6 +39,11 @@ public class Container : MonoBehaviour
         return maxHeight;
     }
 
+    public ContentFlask GetTopContent()
+    {
+        return GetContentAt(transform.childCount - 1);
+    }
+
     public ContentFlask GetContentAt(int index)
     {
         if (transform.childCount <= 0 || index > gameObject.transform.childCount - 1)
@@ -38,5 +51,14 @@ public class Container : MonoBehaviour
             return null;
         }
         return gameObject.transform.GetChild(index).GetComponentInChildren<ContentFlask>();
+    }
+
+    public void UpdateContents(float angle = 0)
+    {
+        ContentFlask[] contents = GetComponentsInChildren<ContentFlask>();
+        for (int i = 0; i < contents.Length; i++)
+        {
+            contents[i].UpdateContent(angle);
+        }
     }
 }

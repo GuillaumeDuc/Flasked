@@ -7,12 +7,26 @@ public class ContentFlask : MonoBehaviour
 {
     private int nbPoints;
     public float height;
+    public float currentHeight;
     private bool spill;
 
     public void SetColor(Color color)
     {
         // Start filling
+        float intensity = 7;
+        float factor = Mathf.Pow(2, intensity);
+        Color newColor = new Color(color.r * factor, color.g * factor, color.b * factor);
         gameObject.GetComponent<MeshRenderer>().material.SetColor("_color", color);
+    }
+
+    public bool HasSameColor(Color color)
+    {
+        return GetMaterial().GetColor("_color") == color;
+    }
+
+    public Color GetColor()
+    {
+        return GetMaterial().GetColor("_color");
     }
 
     public Material GetMaterial()
@@ -20,18 +34,15 @@ public class ContentFlask : MonoBehaviour
         return gameObject.GetComponent<MeshRenderer>().material;
     }
 
-    public void SetHeight(float height)
+    public void SetCurrentHeight(float height)
     {
-        this.height = height;
+        this.currentHeight = height;
     }
 
-    public void UpdateContent(float eulerAngle)
+    public void UpdateContent(float eulerAngle = 0)
     {
-        // Collider
-        EdgeCollider2D edge = GetComponent<EdgeCollider2D>();
-
         Mesh mesh = GetComponent<MeshFilter>().mesh;
-        Vector2[] list = GetListSquare(.01f, height, GetOrigin(), nbPoints);
+        Vector2[] list = GetListSquare(.01f, currentHeight, GetOrigin(), nbPoints);
         Vector2[] uv = new Vector2[list.Length];
 
         // Create the Vector3 vertices
@@ -56,6 +67,8 @@ public class ContentFlask : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
+        // Collider
+        EdgeCollider2D edge = GetComponent<EdgeCollider2D>();
         if (edge != null)
         {
             edge.SetPoints(new List<Vector2>(list));
@@ -67,11 +80,12 @@ public class ContentFlask : MonoBehaviour
         return transform.position;
     }
 
-    public GameObject CreateContentFlask(float width, float height, Vector2 origin, Material material, int nbPoints)
+    public GameObject CreateContentFlask(float width, float height, Vector2 origin, Color color, Material material, int nbPoints)
     {
         this.height = height;
+        this.currentHeight = height;
         this.nbPoints = nbPoints;
-        return GenerateMesh(GetListSquare(width, height, origin, nbPoints), origin, material);
+        return GenerateMesh(GetListSquare(width, height, origin, nbPoints), origin, color, material);
     }
 
     Vector2[] GetListSquare(float width, float height, Vector2 origin, int nbPoints)
@@ -126,7 +140,7 @@ public class ContentFlask : MonoBehaviour
         return res;
     }
 
-    public GameObject GenerateMesh(Vector2[] listVertices, Vector2 target, Material material)
+    public GameObject GenerateMesh(Vector2[] listVertices, Vector2 target, Color color, Material material)
     {
         Vector2[] list = listVertices;
         // Use the triangulator to get indices for creating triangles
@@ -157,6 +171,7 @@ public class ContentFlask : MonoBehaviour
         Renderer renderer = gameObject.GetComponent<MeshRenderer>();
         Material mat = new Material(material);
         renderer.material = mat;
+        SetColor(color);
         return gameObject;
     }
 }

@@ -19,12 +19,6 @@
             "m_Id": "7b965cb2460d4e1199c32231f1685ea1"
         },
         {
-            "m_Id": "bc0cca8c473b436481d59d05c853808d"
-        },
-        {
-            "m_Id": "4824b8c53f5b41f1a6fa738db0303f02"
-        },
-        {
             "m_Id": "c42759b737ab4e288629fa70fc5d27aa"
         }
     ],
@@ -691,12 +685,6 @@
             "m_Id": "7b965cb2460d4e1199c32231f1685ea1"
         },
         {
-            "m_Id": "bc0cca8c473b436481d59d05c853808d"
-        },
-        {
-            "m_Id": "4824b8c53f5b41f1a6fa738db0303f02"
-        },
-        {
             "m_Id": "c42759b737ab4e288629fa70fc5d27aa"
         }
     ]
@@ -1049,33 +1037,6 @@
         "y": 0.0
     },
     "m_Labels": []
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
-    "m_ObjectId": "4824b8c53f5b41f1a6fa738db0303f02",
-    "m_Guid": {
-        "m_GuidSerialized": "a5082733-b837-4b7e-8e04-8190a343482a"
-    },
-    "m_Name": "Intensity",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Intensity",
-    "m_DefaultReferenceName": "_Intensity",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": 5.960000038146973,
-    "m_FloatType": 0,
-    "m_RangeValues": {
-        "x": 0.0,
-        "y": 1.0
-    }
 }
 
 {
@@ -2112,33 +2073,6 @@
     "m_Value": 0.0,
     "m_DefaultValue": 0.0,
     "m_Labels": []
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
-    "m_ObjectId": "bc0cca8c473b436481d59d05c853808d",
-    "m_Guid": {
-        "m_GuidSerialized": "8215480a-c29b-407c-815b-95c7c1821ad4"
-    },
-    "m_Name": "InteriorIntensity",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "InteriorIntensity",
-    "m_DefaultReferenceName": "_InteriorIntensity",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": 1.0,
-    "m_FloatType": 0,
-    "m_RangeValues": {
-        "x": 0.0,
-        "y": 1.0
-    }
 }
 
 {
