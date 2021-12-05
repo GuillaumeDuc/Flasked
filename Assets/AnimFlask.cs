@@ -5,7 +5,7 @@ using UnityEngine;
 public class AnimFlask : MonoBehaviour
 {
     public float selectedPositionHeight = .5f;
-    private float rotationAngle = -65f, defaultAngle = 0;
+    private float rotationAngle = -80f, defaultAngle = 0;
     private Flask flask;
     float spillTime = 5f;
     private Vector3 originalPos;
@@ -40,7 +40,6 @@ public class AnimFlask : MonoBehaviour
             startHeight = topContent.height;
             topContent.height += flask.GetComponentInChildren<Container>().GetTopContent().height;
             topContent.nbPoints += flask.GetComponentInChildren<Container>().GetTopContent().nbPoints;
-            Debug.Log(topContent.nbPoints);
         }
 
         startTime = Time.time;
