@@ -92,9 +92,11 @@ public class ContentFlask : MonoBehaviour
     {
         Vector2[] left = StretchVectors(GetLeftVectors(width, nbPoints), Vector2.left, origin, eulerAngle);
         Vector2[] right = StretchVectors(GetRightVectors(width, nbPoints), Vector2.right, origin, eulerAngle);
-        Vector2[] all = new Vector2[left.Length + right.Length];
+        Vector2[] bottom = GetBottomVectors(left[0], right[right.Length - 1], nbPoints);
+        Vector2[] all = new Vector2[left.Length + right.Length + bottom.Length];
         left.CopyTo(all, 0);
         right.CopyTo(all, right.Length);
+        bottom.CopyTo(all, left.Length + right.Length);
         return all;
     }
 
@@ -118,6 +120,22 @@ public class ContentFlask : MonoBehaviour
         {
             res[i] = new Vector2(width, count * currentHeight / nbPoints);
             count--;
+        }
+        return res;
+    }
+
+    Vector2[] GetBottomVectors(Vector2 start, Vector2 end, int nbPoints)
+    {
+        // Dont get first and last points
+        Vector2[] res = new Vector2[nbPoints];
+        Vector2 current = new Vector2(0, .00001f) + start;
+        float step = (end.x - start.x) / (nbPoints - 1);
+        int i = 0;
+        while (current.x < end.x)
+        {
+            res[i] = new Vector2() + current;
+            current.x += step;
+            i++;
         }
         return res;
     }
