@@ -9,7 +9,7 @@ public class Flask : MonoBehaviour
 
     private int maxSize = 4;
     public int contentHeight = 1;
-    public int nbPoints = 20;
+    public int nbPoints = 5;
     private List<Color> colors = new List<Color>();
     private bool selected = false;
     private AnimFlask animFlask;

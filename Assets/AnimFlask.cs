@@ -39,6 +39,8 @@ public class AnimFlask : MonoBehaviour
         {
             startHeight = topContent.height;
             topContent.height += flask.GetComponentInChildren<Container>().GetTopContent().height;
+            topContent.nbPoints += flask.GetComponentInChildren<Container>().GetTopContent().nbPoints;
+            Debug.Log(topContent.nbPoints);
         }
 
         startTime = Time.time;
@@ -74,7 +76,7 @@ public class AnimFlask : MonoBehaviour
         // Create content if empty
         if (targetContentFlask == null && spill)
         {
-            targetContentFlask = container.AddContentFlask(.1f, contentFlask.height, contentFlask.GetColor(), contentFlask.GetMaterial(), flask.nbPoints);
+            targetContentFlask = container.AddContentFlask(.1f, contentFlask.height, contentFlask.GetColor(), contentFlask.GetMaterial(), contentFlask.nbPoints);
             targetContentFlask.currentHeight = 0;
             UpdateContents(targetFlask);
         }

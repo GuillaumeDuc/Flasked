@@ -5,7 +5,7 @@ using System.Linq;
 
 public class ContentFlask : MonoBehaviour
 {
-    private int nbPoints;
+    public int nbPoints;
     public float height;
     public float currentHeight;
     private bool spill;
@@ -42,7 +42,7 @@ public class ContentFlask : MonoBehaviour
     public void UpdateContent(float eulerAngle = 0)
     {
         Mesh mesh = GetComponent<MeshFilter>().mesh;
-        Vector2[] list = GetListSquare(.01f, currentHeight, GetOrigin(), nbPoints);
+        Vector2[] list = GetListSquare(.01f, GetOrigin(), nbPoints, eulerAngle);
         Vector2[] uv = new Vector2[list.Length];
 
         // Create the Vector3 vertices
@@ -85,59 +85,73 @@ public class ContentFlask : MonoBehaviour
         this.height = height;
         this.currentHeight = height;
         this.nbPoints = nbPoints;
-        return GenerateMesh(GetListSquare(width, height, origin, nbPoints), origin, color, material);
+        return GenerateMesh(GetListSquare(width, origin, nbPoints), origin, color, material);
     }
 
-    Vector2[] GetListSquare(float width, float height, Vector2 origin, int nbPoints)
+    Vector2[] GetListSquare(float width, Vector2 origin, int nbPoints, float eulerAngle = 0)
     {
-        Vector2[] left = StretchVectors(GetLeftVectors(width, height, nbPoints), Vector2.left, origin);
-        Vector2[] right = StretchVectors(GetRightVectors(width, height, nbPoints), Vector2.right, origin);
+        Vector2[] left = StretchVectors(GetLeftVectors(width, nbPoints), Vector2.left, origin, eulerAngle);
+        Vector2[] right = StretchVectors(GetRightVectors(width, nbPoints), Vector2.right, origin, eulerAngle);
         Vector2[] all = new Vector2[left.Length + right.Length];
         left.CopyTo(all, 0);
         right.CopyTo(all, right.Length);
         return all;
     }
 
-    Vector2[] GetLeftVectors(float width, float height, int nbPoints)
+    Vector2[] GetLeftVectors(float width, int nbPoints)
     {
         Vector2[] res = new Vector2[nbPoints];
         // Bottom to up
         for (int i = 0; i < nbPoints; i++)
         {
-            res[i] = new Vector2(-width, i * height / nbPoints);
+            res[i] = new Vector2(-width, i * currentHeight / nbPoints);
         }
         return res;
     }
 
-    Vector2[] GetRightVectors(float width, float height, int nbPoints)
+    Vector2[] GetRightVectors(float width, int nbPoints)
     {
         Vector2[] res = new Vector2[nbPoints];
         int count = nbPoints - 1;
         // Up to bottom
         for (int i = 0; i < nbPoints; i++)
         {
-            res[i] = new Vector2(width, count * height / nbPoints);
+            res[i] = new Vector2(width, count * currentHeight / nbPoints);
             count--;
         }
         return res;
     }
 
-    Vector2[] StretchVectors(Vector2[] points, Vector2 direction, Vector2 origin)
+    Vector2[] StretchVectors(Vector2[] points, Vector2 direction, Vector2 origin, float eulerAngle)
     {
-        int layerMask = 1 << 6;
-        layerMask = ~layerMask;
+        int layerMask = GetContentLayerMask();
 
         Vector2[] res = new Vector2[points.Length];
         for (int i = 0; i < points.Length; i++)
         {
-            Vector2 transformedPoint = points[i] + origin;
+            Vector2 transformedPoint = (points[i] + origin);
+            transformedPoint = RotatePointAroundPivot(transformedPoint, origin, new Vector3(0, 0, eulerAngle));
             RaycastHit2D hit = Physics2D.Raycast(transformedPoint, direction, 100, layerMask);
             if (hit.collider != null)
             {
-                res[i] = res[i] + (hit.point - origin);
+                res[i] = (hit.point - origin);
             }
         }
         return res;
+    }
+
+    Vector2 RotatePointAroundPivot(Vector2 point, Vector2 pivot, Vector3 angles)
+    {
+        Vector2 dir = point - pivot; // get point direction relative to pivot
+        dir = Quaternion.Euler(angles) * dir; // rotate it
+        point = dir + pivot; // calculate rotated point
+        return point; // return it
+    }
+
+    int GetContentLayerMask()
+    {
+        int layerMask = 1 << 6;
+        return ~layerMask;
     }
 
     public GameObject GenerateMesh(Vector2[] listVertices, Vector2 target, Color color, Material material)

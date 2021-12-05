@@ -10,6 +10,7 @@ public class Container : MonoBehaviour
         if (GetTopContent() != null && GetTopContent().HasSameColor(color))
         {
             GetTopContent().height += height;
+            GetTopContent().nbPoints += nbPoints;
             GetTopContent().SetCurrentHeight(GetTopContent().height);
             GetTopContent().UpdateContent();
             return GetTopContent();
@@ -24,7 +25,7 @@ public class Container : MonoBehaviour
         ContentFlask content = meshObj.AddComponent<ContentFlask>();
         if (hit.collider != null)
         {
-            content.CreateContentFlask(width, height, hit.point + new Vector2(0, 0.00001f), color, material, nbPoints);
+            content.CreateContentFlask(width, height, hit.point + new Vector2(0, 0.0001f), color, material, nbPoints);
         }
         return content;
     }
