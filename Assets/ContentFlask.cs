@@ -162,8 +162,9 @@ public class ContentFlask : MonoBehaviour
 
     int GetContentLayerMask()
     {
-        int layerMask = 1 << 6;
-        return ~layerMask;
+        return 1 << GetComponentInParent<Container>().gameObject.layer;
+        // int layerMask = 1 << 6;
+        // return ~layerMask;
     }
 
     public GameObject GenerateMesh(Vector2[] listVertices, Vector2 target, Color color, Material material)

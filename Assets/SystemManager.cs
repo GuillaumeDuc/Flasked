@@ -18,7 +18,7 @@ public class SystemManager : MonoBehaviour
         };
         for (int i = 0; i < flasks.Count; i++)
         {
-            flasks[i].InitFlask();
+            flasks[i].InitFlask(7 + i);
             // Initialize all flask besides last one
             if (i < flasks.Count - 1)
             {

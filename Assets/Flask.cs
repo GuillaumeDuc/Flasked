@@ -120,8 +120,9 @@ public class Flask : MonoBehaviour
         return maxSize;
     }
 
-    public void InitFlask()
+    public void InitFlask(int layerFlaskContainer)
     {
         animFlask = gameObject.GetComponent<AnimFlask>();
+        GetComponentInChildren<Container>().gameObject.layer = layerFlaskContainer;
     }
 }
