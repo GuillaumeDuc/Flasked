@@ -6,7 +6,7 @@ public class Container : MonoBehaviour
 {
     public ContentFlask AddContentFlask(float width, float height, Color color, Material material, int nbPoints)
     {
-        // If top content is same color, increase height
+        // If top content is same color, increase height and return existing content
         if (GetTopContent() != null && GetTopContent().HasSameColor(color))
         {
             GetTopContent().height += height;
@@ -15,6 +15,7 @@ public class Container : MonoBehaviour
             GetTopContent().UpdateContent();
             return GetTopContent();
         }
+        bool isFirstContent = !HasContent();
         // Set up game object with position
         GameObject meshObj = new GameObject("content");
         meshObj.transform.parent = gameObject.transform;
@@ -25,9 +26,14 @@ public class Container : MonoBehaviour
         ContentFlask content = meshObj.AddComponent<ContentFlask>();
         if (hit.collider != null)
         {
-            content.CreateContentFlask(width, height, hit.point + new Vector2(0, 0.0001f), color, material, nbPoints);
+            content.CreateContentFlask(width, height, hit.point + new Vector2(0, 0.0001f), color, material, nbPoints, isFirstContent);
         }
         return content;
+    }
+
+    bool HasContent()
+    {
+        return GetTopContent() != null;
     }
 
     Vector2 GetMaxHeight(Vector2[] points)

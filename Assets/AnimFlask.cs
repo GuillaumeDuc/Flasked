@@ -5,7 +5,7 @@ using UnityEngine;
 public class AnimFlask : MonoBehaviour
 {
     public float selectedPositionHeight = .5f;
-    private float rotationAngle = -80f, defaultAngle = 0;
+    private float rotationAngle = -50f, defaultAngle = 0;
     private Flask flask;
     float spillTime = 5f;
     private Vector3 originalPos;

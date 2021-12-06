@@ -9,6 +9,7 @@ public class ContentFlask : MonoBehaviour
     public float height;
     public float currentHeight;
     private bool spill;
+    public bool firstContent = false;
 
     public void SetColor(Color color)
     {
@@ -80,23 +81,22 @@ public class ContentFlask : MonoBehaviour
         return transform.position;
     }
 
-    public GameObject CreateContentFlask(float width, float height, Vector2 origin, Color color, Material material, int nbPoints)
+    public GameObject CreateContentFlask(float width, float height, Vector2 origin, Color color, Material material, int nbPoints, bool firstContent)
     {
         this.height = height;
         this.currentHeight = height;
         this.nbPoints = nbPoints;
+        this.firstContent = firstContent;
         return GenerateMesh(GetListSquare(width, origin, nbPoints), origin, color, material);
     }
 
     Vector2[] GetListSquare(float width, Vector2 origin, int nbPoints, float eulerAngle = 0)
     {
         Vector2[] left = StretchVectors(GetLeftVectors(width, nbPoints), Vector2.left, origin, eulerAngle);
-        Vector2[] right = StretchVectors(GetRightVectors(width, nbPoints), Vector2.right, origin, eulerAngle);
-        Vector2[] bottom = GetBottomVectors(left[0], right[right.Length - 1], nbPoints);
-        Vector2[] all = new Vector2[left.Length + right.Length + bottom.Length];
+        Vector2[] right = StretchVectors(GetRightVectors(width, nbPoints), Vector2.right, origin, eulerAngle, true);
+        Vector2[] all = new Vector2[left.Length + right.Length];
         left.CopyTo(all, 0);
         right.CopyTo(all, right.Length);
-        bottom.CopyTo(all, left.Length + right.Length);
         return all;
     }
 
@@ -124,32 +124,26 @@ public class ContentFlask : MonoBehaviour
         return res;
     }
 
-    Vector2[] GetBottomVectors(Vector2 start, Vector2 end, int nbPoints)
-    {
-        // Dont get first and last points
-        Vector2[] res = new Vector2[nbPoints];
-        Vector2 current = new Vector2(0, .00001f) + start;
-        float step = (end.x - start.x) / (nbPoints - 1);
-        int i = 0;
-        while (current.x < end.x)
-        {
-            res[i] = new Vector2() + current;
-            current.x += step;
-            i++;
-        }
-        return res;
-    }
-
-    Vector2[] StretchVectors(Vector2[] points, Vector2 direction, Vector2 origin, float eulerAngle)
+    Vector2[] StretchVectors(Vector2[] points, Vector2 direction, Vector2 origin, float eulerAngle, bool ignoreLast = false)
     {
         int layerMask = GetContentLayerMask();
 
         Vector2[] res = new Vector2[points.Length];
         for (int i = 0; i < points.Length; i++)
         {
+
             Vector2 transformedPoint = (points[i] + origin);
             transformedPoint = RotatePointAroundPivot(transformedPoint, origin, new Vector3(0, 0, eulerAngle));
-            RaycastHit2D hit = Physics2D.Raycast(transformedPoint, direction, 100, layerMask);
+            RaycastHit2D hit;
+            // Raycast direction change to fill bottom content of first content
+            if (firstContent && ignoreLast && i > points.Length / 2)
+            {
+                hit = Physics2D.Raycast(transformedPoint, Quaternion.Euler(0, 0, eulerAngle) * direction, 100, layerMask);
+            }
+            else
+            {
+                hit = Physics2D.Raycast(transformedPoint, direction, 100, layerMask);
+            }
             if (hit.collider != null)
             {
                 res[i] = (hit.point - origin);
