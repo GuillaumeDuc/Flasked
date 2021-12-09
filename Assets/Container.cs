@@ -20,8 +20,8 @@ public class Container : MonoBehaviour
         GameObject meshObj = new GameObject("content");
         meshObj.transform.parent = gameObject.transform;
         meshObj.layer = 6;
-        Vector2 highestPoint = transform.TransformPoint(GetMaxHeight(GetComponent<EdgeCollider2D>().points));
-        highestPoint.x = GetComponent<EdgeCollider2D>().bounds.center.x;
+        Bounds bounds = GetComponent<EdgeCollider2D>().bounds;
+        Vector2 highestPoint = new Vector2(bounds.center.x, bounds.center.y + bounds.extents.y);
         RaycastHit2D hit = Physics2D.Raycast(highestPoint, Vector2.down);
         ContentFlask content = meshObj.AddComponent<ContentFlask>();
         if (hit.collider != null)
@@ -34,16 +34,6 @@ public class Container : MonoBehaviour
     bool HasContent()
     {
         return GetTopContent() != null;
-    }
-
-    Vector2 GetMaxHeight(Vector2[] points)
-    {
-        Vector2 maxHeight = points[0];
-        for (int i = 0; i < points.Length; i++)
-        {
-            maxHeight = points[i].y > maxHeight.y ? points[i] : maxHeight;
-        }
-        return maxHeight;
     }
 
     public ContentFlask GetTopContent()

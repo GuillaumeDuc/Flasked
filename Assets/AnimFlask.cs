@@ -5,7 +5,7 @@ using UnityEngine;
 public class AnimFlask : MonoBehaviour
 {
     public float selectedPositionHeight = .5f;
-    private float rotationAngle = -50f, defaultAngle = 0;
+    private float rotationAngle = -60f, defaultAngle = 0;
     private Flask flask;
     float spillTime = 5f;
     private Vector3 originalPos;
@@ -103,6 +103,52 @@ public class AnimFlask : MonoBehaviour
         return angle;
     }
 
+    void CreateSpillShape(float angle)
+    {
+        Container container = flask.GetComponentInChildren<Container>();
+        // .002 : edge radius
+        SpillShape spillShape = GetComponentInChildren<SpillShape>();
+        // Pre-create shape
+        if (spillShape == null)
+        {
+            Bounds boxBounds = container.GetComponent<EdgeCollider2D>().bounds;
+            Vector2 topRight = container.transform.TransformPoint(GetMaxRightHeight(container.GetComponent<EdgeCollider2D>().points));
+
+            GameObject meshObj = new GameObject("Spill");
+            meshObj.transform.parent = gameObject.transform;
+            spillShape = meshObj.AddComponent<SpillShape>();
+            spillShape.Init(container.GetTopContent().GetMaterial(), topRight, flask.nbPoints);
+        }
+        else
+        {
+            int layerMask = 1 << 6;
+            // Try to hit bottom flask content
+            Vector2 pos = spillShape.gameObject.transform.position;
+            RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 100, layerMask);
+            if (hit.collider != null)
+            {
+                Debug.Log("top right " + pos);
+                Debug.Log("hit " + hit.point);
+                spillShape.UpdateShape(hit.point, angle);
+            }
+        }
+    }
+
+    public Vector2 GetMaxRightHeight(Vector2[] points)
+    {
+        Vector2 maxHeight = points[0];
+        for (int i = 0; i < points.Length; i++)
+        {
+            maxHeight = points[i].y > maxHeight.y && points[i].x >= maxHeight.x ? points[i] : maxHeight;
+        }
+        return maxHeight;
+    }
+
+    void DestroySpillShape()
+    {
+        GetComponentInChildren<SpillShape>().DestroySpillShape();
+    }
+
     void Start()
     {
         flask = gameObject.GetComponent<Flask>();
@@ -124,12 +170,15 @@ public class AnimFlask : MonoBehaviour
                 spill = true;
             }
         }
-        if (rotateTo)
+        if (rotateTo) // Rotate to Flask
         {
             rotate(rotationAngle, Time.time - startTime);
             AnimateFillSpillContent(targetFlask, Time.time - startTime);
+            CreateSpillShape(rotationAngle);
+            // End rotation to spill, start rotating back
             if (WrapAngle(transform.localRotation.eulerAngles.z) == rotationAngle && !spill)
             {
+                DestroySpillShape();
                 startTime = Time.time;
                 rotateTo = false;
                 rotateBack = true;
@@ -139,6 +188,7 @@ public class AnimFlask : MonoBehaviour
         if (rotateBack)
         {
             rotate(defaultAngle, Time.time - startTime);
+            // End rotating back
             if (WrapAngle(transform.localRotation.eulerAngles.z) <= defaultAngle + .01f && WrapAngle(transform.localRotation.eulerAngles.z) >= defaultAngle - .01f)
             {
                 startTime = Time.time;
