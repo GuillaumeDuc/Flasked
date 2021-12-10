@@ -50,12 +50,12 @@ public class Container : MonoBehaviour
         return gameObject.transform.GetChild(index).GetComponentInChildren<ContentFlask>();
     }
 
-    public void UpdateContents(float angle = 0)
+    public void UpdateContents(float angle = 0, float time = 0)
     {
         ContentFlask[] contents = GetComponentsInChildren<ContentFlask>();
         for (int i = 0; i < contents.Length; i++)
         {
-            contents[i].UpdateContent(angle);
+            contents[i].UpdateContent(angle, time);
         }
     }
 }

@@ -8,7 +8,7 @@ public class ContentFlask : MonoBehaviour
     public int nbPoints;
     public float height;
     public float currentHeight;
-    private bool spill;
+    public bool fill;
     public bool firstContent = false;
 
     public void SetColor(Color color)
@@ -40,10 +40,10 @@ public class ContentFlask : MonoBehaviour
         this.currentHeight = height;
     }
 
-    public void UpdateContent(float eulerAngle = 0)
+    public void UpdateContent(float eulerAngle = 0, float time = 0)
     {
         Mesh mesh = GetComponent<MeshFilter>().mesh;
-        Vector2[] list = GetListSquare(.01f, GetOrigin(), nbPoints, eulerAngle);
+        Vector2[] list = GetListSquare(.01f, GetOrigin(), nbPoints, eulerAngle, time);
         Vector2[] uv = new Vector2[list.Length];
 
         // Create the Vector3 vertices
@@ -90,14 +90,15 @@ public class ContentFlask : MonoBehaviour
         return GenerateMesh(GetListSquare(width, origin, nbPoints), origin, color, material);
     }
 
-    Vector2[] GetListSquare(float width, Vector2 origin, int nbPoints, float eulerAngle = 0)
+    Vector2[] GetListSquare(float width, Vector2 origin, int nbPoints, float eulerAngle = 0, float time = 0)
     {
         Vector2[] left = StretchVectors(GetLeftVectors(width, nbPoints), Vector2.left, origin, eulerAngle);
         Vector2[] right = StretchVectors(GetRightVectors(width, nbPoints), Vector2.right, origin, eulerAngle, true);
-        Vector2[] all = new Vector2[left.Length + right.Length];
-        left.CopyTo(all, 0);
-        right.CopyTo(all, right.Length);
-        return all;
+        Vector2[] top = GetTopVectors(left[left.Length - 1].x, right[0].x, left[left.Length - 1].y, nbPoints, time);
+        List<Vector2> all = new List<Vector2>(left);
+        all.AddRange(top);
+        all.AddRange(right);
+        return all.ToArray();
     }
 
     Vector2[] GetLeftVectors(float width, int nbPoints)
@@ -122,6 +123,24 @@ public class ContentFlask : MonoBehaviour
             count--;
         }
         return res;
+    }
+
+    Vector2[] GetTopVectors(float start, float end, float height, int nbPoints, float time)
+    {
+        float step = (end - start) / (nbPoints - 1);
+        float current = start + step;
+        List<Vector2> res = new List<Vector2>();
+        while (current < end)
+        {
+            float transformedHeight = height;
+            if (fill)
+            {
+                transformedHeight = transformedHeight + (Mathf.Sin(3f * (current + transformedHeight) * time) / 10);
+            }
+            res.Add(new Vector2(current, transformedHeight));
+            current += step;
+        }
+        return res.ToArray();
     }
 
     Vector2[] StretchVectors(Vector2[] points, Vector2 direction, Vector2 origin, float eulerAngle, bool ignoreLast = false)
