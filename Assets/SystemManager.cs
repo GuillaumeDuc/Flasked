@@ -4,30 +4,70 @@ using UnityEngine;
 
 public class SystemManager : MonoBehaviour
 {
+    public int nbContent = 4;
+    public int nbEmpty = 2;
     public List<Flask> flasks = new List<Flask>();
     private List<Color> colors;
     private Flask selectedFlask;
     void Start()
     {
-        // Initialize colors
-        colors = new List<Color>() {
+        bool solved;
+        int tentative = 1;
+        do
+        {
+            InitFlasks();
+            solved = Solver.Solve(flasks);
+            tentative += 1;
+        } while (!solved);
+        Debug.Log(tentative);
+    }
+
+    void InitFlasks()
+    {
+        List<Color> colorList = GetColorFullContent(nbEmpty);
+        // Loop through all flask
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            flasks[i].InitFlask(7 + i);
+            if (i < flasks.Count - nbEmpty)
+            {
+                // Fill until it reaches top
+                for (int j = 0; j < nbContent; j++)
+                {
+                    int colorIndex = Random.Range(0, colorList.Count);
+                    Color color = colorList[colorIndex];
+                    colorList.RemoveAt(colorIndex);
+                    flasks[i].AddColor(color, flasks[i].contentHeight);
+                }
+            }
+        }
+    }
+
+    List<Color> GetColorFullContent(int nbEmpty)
+    {
+        List<Color> colorList = new List<Color>();
+        // Fill list color
+        for (int i = 0; i < (flasks.Count - nbEmpty); i++)
+        {
+            for (int j = 0; j < nbContent; j++)
+            {
+                colorList.Add(GetColors()[i]);
+            }
+        }
+        return colorList;
+    }
+
+    List<Color> GetColors()
+    {
+        return new List<Color>() {
             Color.cyan,
             Color.red,
             Color.green,
             Color.yellow,
+            Color.white,
+            Color.magenta,
+            Color.gray
         };
-        for (int i = 0; i < flasks.Count; i++)
-        {
-            flasks[i].InitFlask(7 + i);
-            // Initialize all flask besides last one
-            if (i < flasks.Count - 1)
-            {
-                for (int j = 0; j < Random.Range(3, 5); j++)
-                {
-                    flasks[i].AddColor(colors[Random.Range(0, 4)], flasks[i].contentHeight);
-                }
-            }
-        }
     }
 
     bool SpillBottle(Flask giver, Flask receiver)

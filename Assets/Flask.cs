@@ -89,17 +89,24 @@ public class Flask : MonoBehaviour
         return false;
     }
 
+    public bool CanSpill(Flask flask, List<Color> colorsToSpill)
+    {
+        return !this.Equals(flask) && flask != null && HasEnoughSpace(flask, colorsToSpill) && EqualsTopColor(flask) && !IsEmpty();
+    }
+
     private bool HasEnoughSpace(Flask flask, List<Color> colorSpill)
     {
         int size = flask.GetColors().Count + colorSpill.Count;
         return flask.maxSize >= size;
     }
 
+
+
     public bool SpillTo(Flask flask)
     {
         List<Color> colorsToSpill = this.PopColors();
         // Spill only when not in own flask, if flask is not null, if space is enough, if both top color match
-        if (!this.Equals(flask) && flask != null && HasEnoughSpace(flask, colorsToSpill) && EqualsTopColor(flask))
+        if (CanSpill(flask, colorsToSpill))
         {
             // Play animation
             animFlask.SpillAnimation(flask);
@@ -120,9 +127,37 @@ public class Flask : MonoBehaviour
         return maxSize;
     }
 
+    public void SetMaxSize(int maxSize)
+    {
+        this.maxSize = maxSize;
+    }
+
     public void InitFlask(int layerFlaskContainer)
     {
         animFlask = gameObject.GetComponent<AnimFlask>();
         GetComponentInChildren<Container>().gameObject.layer = layerFlaskContainer;
+    }
+
+    public bool IsCleared()
+    {
+        if (colors.Count == 0)
+        {
+            return false;
+        }
+        bool sameColor = true;
+        Color color = colors[0];
+        colors.ForEach(c =>
+        {
+            if (!c.Equals(color))
+            {
+                sameColor = false;
+            }
+        });
+        return sameColor && colors.Count == maxSize;
+    }
+
+    public bool IsEmpty()
+    {
+        return colors.Count == 0;
     }
 }

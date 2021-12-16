@@ -179,7 +179,7 @@ public class AnimFlask : MonoBehaviour
             AnimateFillSpillContent(targetFlask, Time.time - startTime);
             CreateSpillShape(rotationAngle);
             // End rotation to spill, start rotating back
-            if (WrapAngle(transform.localRotation.eulerAngles.z) == rotationAngle && !spill)
+            if (!spill)
             {
                 DestroySpillShape();
                 startTime = Time.time;
