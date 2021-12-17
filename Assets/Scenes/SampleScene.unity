@@ -156,6 +156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &1191816
@@ -334,6 +335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &153536175
@@ -463,6 +465,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &185667065
@@ -647,6 +650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &313370374
@@ -1779,6 +1783,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!65 &1324892400
@@ -2026,6 +2031,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &1677800967
@@ -2231,6 +2237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &1854178983
@@ -2360,6 +2367,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 26aa19e72a507ac42b4abe734b21e8f0, type: 2}
+  clearedMaterial: {fileID: 2100000, guid: 3f180b755e0fbb341aba4102d316117a, type: 2}
   contentHeight: 1
   nbPoints: 20
 --- !u!4 &2132285339

@@ -13,10 +13,6 @@ public class ContentFlask : MonoBehaviour
 
     public void SetColor(Color color)
     {
-        // Start filling
-        float intensity = 7;
-        float factor = Mathf.Pow(2, intensity);
-        Color newColor = new Color(color.r * factor, color.g * factor, color.b * factor);
         gameObject.GetComponent<MeshRenderer>().material.SetColor("_color", color);
     }
 
@@ -33,6 +29,15 @@ public class ContentFlask : MonoBehaviour
     public Material GetMaterial()
     {
         return gameObject.GetComponent<MeshRenderer>().material;
+    }
+
+    public void SetMaterial(Material newMat, int intensity)
+    {
+        Color color = GetColor();
+        GetComponent<MeshRenderer>().material = new Material(newMat);
+        float factor = Mathf.Pow(2, intensity);
+        Color newColor = new Color(color.r * factor, color.g * factor, color.b * factor);
+        GetComponent<MeshRenderer>().material.SetColor("_color", newColor);
     }
 
     public void SetCurrentHeight(float height)

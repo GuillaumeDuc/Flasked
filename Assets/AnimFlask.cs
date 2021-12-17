@@ -69,11 +69,17 @@ public class AnimFlask : MonoBehaviour
         {
             contentFlask.SetCurrentHeight((1 - time) * contentFlask.height);
         }
-        else if (contentFlask != null && spill) // end
+        ////////////// END SPILLING //////////////////
+        else if (contentFlask != null && spill)
         {
             spill = false;
             targetContentFlask.fill = false;
             Destroy(GetComponentInChildren<Container>().GetTopContent().gameObject);
+            // Set cleared mat if flask is cleared
+            if (targetFlask.IsCleared())
+            {
+                targetFlask.SetClearedMaterial(10);
+            }
         }
 
         // Create content if empty

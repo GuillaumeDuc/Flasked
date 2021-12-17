@@ -6,6 +6,7 @@ using System.Linq;
 public class Flask : MonoBehaviour
 {
     public Material material;
+    public Material clearedMaterial;
 
     private int maxSize = 4;
     public int contentHeight = 1;
@@ -13,6 +14,7 @@ public class Flask : MonoBehaviour
     private List<Color> colors = new List<Color>();
     private bool selected = false;
     private AnimFlask animFlask;
+    private bool clearedState = false;
 
     public void AddColor(Color color, float height)
     {
@@ -100,8 +102,6 @@ public class Flask : MonoBehaviour
         return flask.maxSize >= size;
     }
 
-
-
     public bool SpillTo(Flask flask)
     {
         List<Color> colorsToSpill = this.PopColors();
@@ -110,8 +110,15 @@ public class Flask : MonoBehaviour
         {
             // Play animation
             animFlask.SpillAnimation(flask);
+            // Remove content from flask
             RemoveColors(colorsToSpill.Count);
+            // Add color to target flask
             colorsToSpill.ForEach(color => { flask.GetColors().Add(color); });
+            // Check if target flask is full, if so remove collider
+            if (flask.IsCleared())
+            {
+                flask.RemoveCollider();
+            }
             return true;
         }
         return false;
@@ -159,5 +166,21 @@ public class Flask : MonoBehaviour
     public bool IsEmpty()
     {
         return colors.Count == 0;
+    }
+
+    public void RemoveCollider()
+    {
+        // Remove Collider
+        Destroy(GetComponent<BoxCollider>());
+    }
+
+    public void SetClearedMaterial(int intensity)
+    {
+        if (!clearedState)
+        {
+            // Change Flask Material
+            GetComponentInChildren<Container>().GetTopContent().SetMaterial(clearedMaterial, intensity);
+            clearedState = true;
+        }
     }
 }
