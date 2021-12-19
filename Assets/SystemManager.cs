@@ -1,15 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SystemManager : MonoBehaviour
 {
     public int nbContent = 4;
     public int nbEmpty = 2;
     public List<Flask> flasks = new List<Flask>();
+    public GameObject EndPanel;
+    public Text textCount;
     private List<Color> colors;
     private Flask selectedFlask;
     void Start()
+    {
+        SetInfo();
+        Init();
+    }
+
+    void SetInfo()
+    {
+        textCount.text = "" + Store.score;
+    }
+
+    void Init()
     {
         bool solved;
         int tentative = 1;
@@ -76,6 +91,31 @@ public class SystemManager : MonoBehaviour
         return spilled;
     }
 
+    void End()
+    {
+        bool end = true;
+        flasks.ForEach(flask =>
+        {
+            if (!flask.IsCleared() && !flask.IsEmpty())
+            {
+                end = false;
+            }
+        });
+        if (end)
+        {
+            EndPanel.SetActive(true);
+            Debug.Log("end");
+            StartCoroutine(NextLevel());
+        }
+    }
+
+    IEnumerator NextLevel()
+    {
+        Store.score += 1;
+        yield return new WaitForSeconds(4f);
+        SceneManager.LoadScene(0);
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -98,6 +138,10 @@ public class SystemManager : MonoBehaviour
                         if (!spilled)
                         {
                             clickedFlask.SetSelected();
+                        }
+                        else
+                        {
+                            End();
                         }
                     }
                     selectedFlask?.SetUnselected();

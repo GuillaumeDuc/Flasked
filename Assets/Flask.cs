@@ -63,7 +63,6 @@ public class Flask : MonoBehaviour
         {
             animFlask.MoveSelected();
             selected = true;
-            Debug.Log(colors.Count);
         }
     }
 
