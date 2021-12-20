@@ -9,6 +9,7 @@ public class SystemManager : MonoBehaviour
     public int nbContent = 4;
     public int nbEmpty = 2;
     public List<Flask> flasks = new List<Flask>();
+    public Button RefreshButton;
     public GameObject EndPanel;
     public Text textCount;
     private List<Color> colors;
@@ -16,7 +17,13 @@ public class SystemManager : MonoBehaviour
     void Start()
     {
         SetInfo();
+        InitRefreshButton();
         Init();
+    }
+
+    void InitRefreshButton()
+    {
+        RefreshButton.onClick.AddListener(RefreshScene);
     }
 
     void SetInfo()
@@ -43,7 +50,7 @@ public class SystemManager : MonoBehaviour
         // Loop through all flask
         for (int i = 0; i < flasks.Count; i++)
         {
-            flasks[i].InitFlask(7 + i);
+            flasks[i].InitFlask(7 + i, nbContent);
             if (i < flasks.Count - nbEmpty)
             {
                 // Fill until it reaches top
@@ -104,7 +111,6 @@ public class SystemManager : MonoBehaviour
         if (end)
         {
             EndPanel.SetActive(true);
-            Debug.Log("end");
             StartCoroutine(NextLevel());
         }
     }
@@ -113,6 +119,17 @@ public class SystemManager : MonoBehaviour
     {
         Store.score += 1;
         yield return new WaitForSeconds(4f);
+        ReloadScene();
+    }
+
+    void RefreshScene()
+    {
+        Store.score = 0;
+        ReloadScene();
+    }
+
+    void ReloadScene()
+    {
         SceneManager.LoadScene(0);
     }
 

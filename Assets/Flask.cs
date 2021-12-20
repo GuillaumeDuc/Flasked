@@ -9,7 +9,7 @@ public class Flask : MonoBehaviour
     public Material clearedMaterial;
 
     private int maxSize = 4;
-    public int contentHeight = 1;
+    public float contentHeight = 1;
     public int nbPoints = 5;
     private List<Color> colors = new List<Color>();
     private bool selected = false;
@@ -133,13 +133,9 @@ public class Flask : MonoBehaviour
         return maxSize;
     }
 
-    public void SetMaxSize(int maxSize)
+    public void InitFlask(int layerFlaskContainer, int maxSize)
     {
         this.maxSize = maxSize;
-    }
-
-    public void InitFlask(int layerFlaskContainer)
-    {
         animFlask = gameObject.GetComponent<AnimFlask>();
         GetComponentInChildren<Container>().gameObject.layer = layerFlaskContainer;
     }

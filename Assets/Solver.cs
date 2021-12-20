@@ -156,17 +156,6 @@ public class Node
         node.previous = this;
     }
 
-    public void PrintNext()
-    {
-        Debug.Log("LIST");
-        next.ForEach(node =>
-        {
-            Debug.Log("---------------------------");
-            Debug.Log("SELECTED " + node.selectedFlask?.position);
-            Debug.Log("SPILL TO " + node.targetFlask?.position);
-        });
-    }
-
     public override string ToString()
     {
         return "SELECTED " + selectedFlask?.position + "\nSPILL TO " + targetFlask?.position;
