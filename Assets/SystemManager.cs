@@ -145,8 +145,9 @@ public class SystemManager : MonoBehaviour
                 Flask clickedFlask = hit.transform.gameObject.GetComponent<Flask>();
                 bool spilled = false;
                 // GameObject clicked is flask
-                if (clickedFlask != null)
+                if (clickedFlask != null && !clickedFlask.IsMoving())
                 {
+                    // Flask clicked is not already selected and is not moving
                     if (!clickedFlask.Equals(selectedFlask))
                     {
                         // Clicked flask, try to spill
@@ -158,6 +159,7 @@ public class SystemManager : MonoBehaviour
                         }
                         else
                         {
+                            // Spilled, try to end
                             End();
                         }
                     }

@@ -16,6 +16,11 @@ public class AnimFlask : MonoBehaviour
     float spillTime = 3f;
     float speed = 4f;
 
+    public bool IsMoving()
+    {
+        return move || moveBack || rotateTo || rotateBack;
+    }
+
     public void MoveSelected()
     {
         gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + selectedPositionHeight);

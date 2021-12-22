@@ -92,7 +92,18 @@ public class Flask : MonoBehaviour
 
     public bool CanSpill(Flask flask, List<Color> colorsToSpill)
     {
-        return !this.Equals(flask) && flask != null && HasEnoughSpace(flask, colorsToSpill) && EqualsTopColor(flask) && !IsEmpty();
+        return !this.Equals(flask) &&
+        flask != null &&
+        HasEnoughSpace(flask, colorsToSpill) &&
+        EqualsTopColor(flask) &&
+        !IsEmpty() &&
+        !IsMoving() &&
+        !flask.IsMoving();
+    }
+
+    public bool IsMoving()
+    {
+        return animFlask.IsMoving();
     }
 
     private bool HasEnoughSpace(Flask flask, List<Color> colorSpill)
