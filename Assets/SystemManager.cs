@@ -118,7 +118,7 @@ public class SystemManager : MonoBehaviour
     IEnumerator NextLevel()
     {
         Store.score += 1;
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(3.5f);
         ReloadScene();
     }
 

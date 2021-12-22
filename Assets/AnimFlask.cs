@@ -7,13 +7,14 @@ public class AnimFlask : MonoBehaviour
     public float selectedPositionHeight = .5f;
     private float rotationAngle = -60f, defaultAngle = 0;
     private Flask flask;
-    float spillTime = 5f;
     private Vector3 originalPos;
     private Flask targetFlask;
     private Vector3 targetPosition;
     private bool move = false, rotateTo = false, rotateBack = false, moveBack = false, spill = false;
     private float startHeight;
     float startTime;
+    float spillTime = 3f;
+    float speed = 4f;
 
     public void MoveSelected()
     {
@@ -97,10 +98,10 @@ public class AnimFlask : MonoBehaviour
         }
     }
 
-    private void rotate(float angle, float time)
+    private void rotate(float angle, float ratio)
     {
         // Rotate flask
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), (Time.time - startTime) / spillTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), ratio);
         // Rotate Content relative to up position
         UpdateContents(targetFlask);
     }
@@ -169,7 +170,7 @@ public class AnimFlask : MonoBehaviour
         // Move to target, rotate left, rotate back, move to original position
         if (move)
         {
-            transform.position = Vector3.Lerp(originalPos, targetPosition, Time.time - startTime);
+            transform.position = Vector3.Lerp(originalPos, targetPosition, (Time.time - startTime) * speed);
 
             if (transform.position == targetPosition)
             {
@@ -181,7 +182,7 @@ public class AnimFlask : MonoBehaviour
         }
         if (rotateTo) // Rotate to Flask
         {
-            rotate(rotationAngle, Time.time - startTime);
+            rotate(rotationAngle, (Time.time - startTime) / spillTime);
             AnimateFillSpillContent(targetFlask, Time.time - startTime);
             CreateSpillShape(rotationAngle);
             // End rotation to spill, start rotating back
@@ -196,9 +197,10 @@ public class AnimFlask : MonoBehaviour
         // Wait for content to finish spilling / filling
         if (rotateBack)
         {
-            rotate(defaultAngle, Time.time - startTime);
+            rotate(defaultAngle, (Time.time - startTime) / (spillTime / 2));
+            float round = Mathf.Round(WrapAngle(transform.localRotation.eulerAngles.z) * 10f) / 10f;
             // End rotating back
-            if (WrapAngle(transform.localRotation.eulerAngles.z) <= defaultAngle + .01f && WrapAngle(transform.localRotation.eulerAngles.z) >= defaultAngle - .01f)
+            if (round == defaultAngle)
             {
                 startTime = Time.time;
                 rotateBack = false;
@@ -207,7 +209,7 @@ public class AnimFlask : MonoBehaviour
         }
         if (moveBack)
         {
-            transform.position = Vector3.Lerp(targetPosition, originalPos, Time.time - startTime);
+            transform.position = Vector3.Lerp(targetPosition, originalPos, (Time.time - startTime) * speed);
             if (transform.position == originalPos)
             {
                 startTime = Time.time;
