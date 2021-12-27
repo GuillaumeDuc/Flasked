@@ -10,7 +10,7 @@ public class AnimFlask : MonoBehaviour
     private Vector3 originalPos;
     private Flask targetFlask;
     private Vector3 targetPosition;
-    private bool move = false, rotateTo = false, rotateBack = false, moveBack = false, spill = false;
+    private bool move = false, rotateTo = false, rotateBack = false, moveBack = false, spill = false, fill = false;
     private float startHeight;
     float startTime;
     float spillTime = 3f;
@@ -37,39 +37,20 @@ public class AnimFlask : MonoBehaviour
         this.targetFlask = targetFlask;
         this.targetPosition = new Vector3(targetFlask.gameObject.transform.position.x - 2f, targetFlask.gameObject.transform.position.y + 3f);
 
-        ContentFlask topContent = targetFlask.GetComponentInChildren<Container>().GetTopContent();
-        // Flask filled starting height
-        startHeight = 0;
-        // Flask filled new height
-        if (topContent != null)
-        {
-            startHeight = topContent.height;
-            topContent.fill = true;
-            topContent.height += flask.GetComponentInChildren<Container>().GetTopContent().height;
-            topContent.nbPoints += flask.GetComponentInChildren<Container>().GetTopContent().nbPoints;
-        }
-
         startTime = Time.time;
         // Start animation
         move = true;
-
     }
 
-    void UpdateContents(Flask targetFlask)
+    void UpdateContents()
     {
         // Animate all contents in flasks
         GetComponentInChildren<Container>().UpdateContents(transform.localRotation.eulerAngles.z, Time.time - startTime);
-        targetFlask.GetComponentInChildren<Container>().UpdateContents(targetFlask.transform.localRotation.eulerAngles.z, Time.time - startTime);
     }
 
-    void AnimateFillSpillContent(Flask targetFlask, float time)
+    void AnimateSpillContent(float time)
     {
         ContentFlask contentFlask = flask.GetComponentInChildren<Container>().GetTopContent();
-
-        // Target flask
-        Container container = targetFlask.GetComponentInChildren<Container>();
-        ContentFlask targetContentFlask = container.GetTopContent();
-
         // Spill Top
         if (contentFlask != null && contentFlask.currentHeight >= 0.01f && spill)
         {
@@ -79,28 +60,61 @@ public class AnimFlask : MonoBehaviour
         else if (contentFlask != null && spill)
         {
             spill = false;
-            targetContentFlask.fill = false;
             Destroy(GetComponentInChildren<Container>().GetTopContent().gameObject);
+        }
+    }
+
+    public void FillContent(Flask targetFlask)
+    {
+        ContentFlask topContent = GetComponentInChildren<Container>().GetTopContent();
+        // Flask filled starting height
+        startHeight = 0;
+        // Flask filled new height
+        if (topContent != null)
+        {
+            startHeight = topContent.currentHeight;
+            topContent.fill = true;
+            topContent.height += targetFlask.GetComponentInChildren<Container>().GetTopContent().height;
+            topContent.nbPoints += targetFlask.GetComponentInChildren<Container>().GetTopContent().nbPoints;
+        }
+        this.targetFlask = targetFlask;
+        if (!fill)
+        {
+            startTime = Time.time;
+            fill = true;
+        }
+    }
+
+    private void AnimateFillContent(float time)
+    {
+        // Content flask
+        Container container = GetComponentInChildren<Container>();
+        ContentFlask contentFlask = container.GetTopContent();
+        // Spilling flask
+        Container spillingContainer = targetFlask.GetComponentInChildren<Container>();
+        ContentFlask spillingContentFlask = spillingContainer.GetTopContent();
+        // Create content if empty
+        if (contentFlask == null)
+        {
+            contentFlask = container.AddContentFlask(.1f, spillingContentFlask.height, spillingContentFlask.GetColor(), spillingContentFlask.GetMaterial(), spillingContentFlask.nbPoints);
+            contentFlask.currentHeight = 0;
+            contentFlask.fill = true;
+        }
+        Debug.Log("height " + contentFlask.height);
+        Debug.Log("current height " + contentFlask.currentHeight);
+        contentFlask.SetCurrentHeight(startHeight + (time * (contentFlask.height - startHeight)));
+        // End filling
+        if (startHeight + (time * (contentFlask.height - startHeight)) >= contentFlask.height)
+        {
+            fill = false;
+            contentFlask.fill = false;
             // Set cleared mat if flask is cleared
-            if (targetFlask.IsCleared())
+            if (flask.IsCleared())
             {
-                targetFlask.SetClearedMaterial(10);
+                flask.SetClearedMaterial(10);
             }
         }
-
-        // Create content if empty
-        if (targetContentFlask == null && spill)
-        {
-            targetContentFlask = container.AddContentFlask(.1f, contentFlask.height, contentFlask.GetColor(), contentFlask.GetMaterial(), contentFlask.nbPoints);
-            targetContentFlask.currentHeight = 0;
-            targetContentFlask.fill = true;
-            UpdateContents(targetFlask);
-        }
-        // Fill Top
-        if (spill)
-        {
-            targetContentFlask.SetCurrentHeight(startHeight + (time * (targetContentFlask.height - startHeight)));
-        }
+        UpdateContents();
     }
 
     private void rotate(float angle, float ratio)
@@ -108,7 +122,7 @@ public class AnimFlask : MonoBehaviour
         // Rotate flask
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 0, angle), ratio);
         // Rotate Content relative to up position
-        UpdateContents(targetFlask);
+        UpdateContents();
     }
 
     private static float WrapAngle(float angle)
@@ -179,6 +193,8 @@ public class AnimFlask : MonoBehaviour
 
             if (transform.position == targetPosition)
             {
+                // Start filling target
+                targetFlask.GetComponent<AnimFlask>().FillContent(this.flask);
                 startTime = Time.time;
                 rotateTo = true;
                 move = false;
@@ -188,7 +204,7 @@ public class AnimFlask : MonoBehaviour
         if (rotateTo) // Rotate to Flask
         {
             rotate(rotationAngle, (Time.time - startTime) / spillTime);
-            AnimateFillSpillContent(targetFlask, Time.time - startTime);
+            AnimateSpillContent(Time.time - startTime);
             CreateSpillShape(rotationAngle);
             // End rotation to spill, start rotating back
             if (!spill)
@@ -220,6 +236,11 @@ public class AnimFlask : MonoBehaviour
                 startTime = Time.time;
                 moveBack = false;
             }
+        }
+
+        if (fill)
+        {
+            AnimateFillContent(Time.time - startTime);
         }
     }
 }
