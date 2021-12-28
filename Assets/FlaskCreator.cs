@@ -12,15 +12,25 @@ public static class FlaskCreator
         Color.white,
         Color.magenta,
         Color.gray,
-        new Color(.3f,.3f,.3f),
-        new Color(.3f,0,.3f),
-        new Color(.3f,.3f,0f),
-        new Color(.3f,.9f,.3f),
+        new Color(.5f,.3f,.5f),
+        new Color(.9f,0,.3f),
+        new Color(.3f,.3f,5f),
+        new Color(.3f,.9f,.9f),
+        new Color(.8f,.5f,.3f),
+        new Color(.3f,.9f,.2f),
+        new Color(.5f,.5f,.3f),
+        new Color(.2f,.2f,.5f),
+        new Color(.9f,.9f,.1f),
+        new Color(.6f,.7f,.1f),
+        new Color(.1f,.3f,.7f),
+        new Color(.2f,.5f,.2f),
+        new Color(.9f,.7f,.7f),
     };
 
-    public static List<Flask> CreateFlasks(GameObject prefab, int nbFlask, int nbContent, int nbEmpty, float contentHeight)
+    public static List<Flask> CreateFlasks(GameObject prefab, int level, int nbContent, int nbEmpty, float contentHeight)
     {
         List<Flask> flasks = new List<Flask>();
+        int nbFlask = GetNbFlask(level);
         List<Color> colorList = GetColorFullContent(nbFlask - nbEmpty, nbContent, nbEmpty);
         float xStep = .08f;
         float yStep = .42f;
@@ -87,8 +97,8 @@ public static class FlaskCreator
         return colorList;
     }
 
-    static void GetPos()
+    static int GetNbFlask(int level)
     {
-
+        return 4 + ((int)(level / 3) * 2);
     }
 }

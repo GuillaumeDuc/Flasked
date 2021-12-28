@@ -4,5 +4,5 @@ using UnityEngine;
 
 public static class Store
 {
-    public static int score = 0;
+    public static int level = 0;
 }

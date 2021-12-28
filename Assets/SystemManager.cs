@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class SystemManager : MonoBehaviour
 {
-    public int nbFlask = 8;
     public int nbContent = 4;
     public int nbEmpty = 2;
     public float contentHeight = 1;
@@ -30,18 +29,18 @@ public class SystemManager : MonoBehaviour
 
     void SetInfo()
     {
-        textCount.text = "" + Store.score;
+        textCount.text = "" + (Store.level + 1);
     }
 
     void Init()
     {
         bool solved;
         int tentative = 1;
-        flasks = FlaskCreator.CreateFlasks(flaskPrefab, nbFlask, nbContent, nbEmpty, contentHeight);
+        flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, nbContent, nbEmpty, contentHeight);
         solved = Solver.Solve(flasks);
         while (!solved)
         {
-            FlaskCreator.FillFlasksRandom(flasks, nbFlask, nbContent, nbEmpty, contentHeight);
+            FlaskCreator.FillFlasksRandom(flasks, flasks.Count, nbContent, nbEmpty, contentHeight);
             solved = Solver.Solve(flasks);
             tentative += 1;
         }
@@ -74,14 +73,14 @@ public class SystemManager : MonoBehaviour
 
     IEnumerator NextLevel()
     {
-        Store.score += 1;
+        Store.level += 1;
         yield return new WaitForSeconds(3.5f);
         ReloadScene();
     }
 
     void RefreshScene()
     {
-        Store.score = 0;
+        Store.level = 0;
         ReloadScene();
     }
 
