@@ -189,4 +189,9 @@ public class Flask : MonoBehaviour
             clearedState = true;
         }
     }
+
+    public void Clear()
+    {
+        GetComponentInChildren<Container>().ClearContents();
+    }
 }

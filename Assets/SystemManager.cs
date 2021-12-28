@@ -6,13 +6,15 @@ using UnityEngine.UI;
 
 public class SystemManager : MonoBehaviour
 {
+    public int nbFlask = 8;
     public int nbContent = 4;
     public int nbEmpty = 2;
-    public List<Flask> flasks = new List<Flask>();
+    public float contentHeight = 1;
+    public GameObject flaskPrefab;
     public Button RefreshButton;
     public GameObject EndPanel;
     public Text textCount;
-    private List<Color> colors;
+    private List<Flask> flasks = new List<Flask>();
     private Flask selectedFlask;
     void Start()
     {
@@ -35,61 +37,16 @@ public class SystemManager : MonoBehaviour
     {
         bool solved;
         int tentative = 1;
-        do
+        flasks = FlaskCreator.CreateFlasks(flaskPrefab, nbFlask, nbContent, nbEmpty, contentHeight);
+        solved = Solver.Solve(flasks);
+        while (!solved)
         {
-            InitFlasks();
+            FlaskCreator.FillFlasksRandom(flasks, nbFlask, nbContent, nbEmpty, contentHeight);
             solved = Solver.Solve(flasks);
             tentative += 1;
-        } while (!solved);
+        }
+
         Debug.Log(tentative);
-    }
-
-    void InitFlasks()
-    {
-        List<Color> colorList = GetColorFullContent(nbEmpty);
-        // Loop through all flask
-        for (int i = 0; i < flasks.Count; i++)
-        {
-            flasks[i].InitFlask(7 + i, nbContent);
-            if (i < flasks.Count - nbEmpty)
-            {
-                // Fill until it reaches top
-                for (int j = 0; j < nbContent; j++)
-                {
-                    int colorIndex = Random.Range(0, colorList.Count);
-                    Color color = colorList[colorIndex];
-                    colorList.RemoveAt(colorIndex);
-                    flasks[i].AddColor(color, flasks[i].contentHeight);
-                }
-            }
-        }
-    }
-
-    List<Color> GetColorFullContent(int nbEmpty)
-    {
-        List<Color> colorList = new List<Color>();
-        // Fill list color
-        for (int i = 0; i < (flasks.Count - nbEmpty); i++)
-        {
-            for (int j = 0; j < nbContent; j++)
-            {
-                colorList.Add(GetColors()[i]);
-            }
-        }
-        return colorList;
-    }
-
-    List<Color> GetColors()
-    {
-        return new List<Color>() {
-            Color.cyan,
-            Color.red,
-            Color.green,
-            Color.yellow,
-            Color.white,
-            Color.magenta,
-            Color.gray
-        };
     }
 
     bool SpillBottle(Flask giver, Flask receiver)

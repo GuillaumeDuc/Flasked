@@ -58,4 +58,13 @@ public class Container : MonoBehaviour
             contents[i].UpdateContent(angle, time);
         }
     }
+
+    public void ClearContents()
+    {
+        ContentFlask[] contents = GetComponentsInChildren<ContentFlask>();
+        for (int i = 0; i < contents.Length; i++)
+        {
+            Destroy(contents[i]);
+        }
+    }
 }

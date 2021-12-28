@@ -100,8 +100,6 @@ public class AnimFlask : MonoBehaviour
             contentFlask.currentHeight = 0;
             contentFlask.fill = true;
         }
-        Debug.Log("height " + contentFlask.height);
-        Debug.Log("current height " + contentFlask.currentHeight);
         contentFlask.SetCurrentHeight(startHeight + (time * (contentFlask.height - startHeight)));
         // End filling
         if (startHeight + (time * (contentFlask.height - startHeight)) >= contentFlask.height)
