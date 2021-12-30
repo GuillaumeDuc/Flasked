@@ -9,17 +9,27 @@ public class SystemManager : MonoBehaviour
     public int nbContent = 4;
     public int nbEmpty = 2;
     public float contentHeight = 1;
+    public int nbRetry = 3;
     public GameObject flaskPrefab;
     public Button RefreshButton;
+    public Button RetryButton;
+    public Button UndoButton;
     public GameObject EndPanel;
     public Text textCount;
+    public Text retryCount;
     private List<Flask> flasks = new List<Flask>();
     private Flask selectedFlask;
     void Start()
     {
-        SetInfo();
-        InitRefreshButton();
         Init();
+        SetInfo();
+        InitButtons();
+    }
+
+    void InitButtons()
+    {
+        InitRefreshButton();
+        InitRetryButton();
     }
 
     void InitRefreshButton()
@@ -27,9 +37,15 @@ public class SystemManager : MonoBehaviour
         RefreshButton.onClick.AddListener(RefreshScene);
     }
 
+    void InitRetryButton()
+    {
+        RetryButton.onClick.AddListener(RetryScene);
+    }
+
     void SetInfo()
     {
         textCount.text = "" + (Store.level + 1);
+        retryCount.text = "" + Store.retryCount;
     }
 
     void Init()
@@ -44,6 +60,9 @@ public class SystemManager : MonoBehaviour
             solved = Solver.Solve(flasks);
             tentative += 1;
         }
+
+        Store.SaveFlasksBeginLevel(flasks);
+        Store.retryCount = nbRetry;
 
         Debug.Log(tentative);
     }
@@ -76,6 +95,25 @@ public class SystemManager : MonoBehaviour
         Store.level += 1;
         yield return new WaitForSeconds(3.5f);
         ReloadScene();
+    }
+
+    void RetryScene()
+    {
+        bool isMoving = false;
+        // Can't retry if a flask is moving
+        flasks.ForEach(flask =>
+        {
+            if (flask.IsMoving())
+            {
+                isMoving = true;
+            }
+        });
+        if (!isMoving && Store.retryCount > 0)
+        {
+            FlaskCreator.RefillFlask(flasks, Store.savedFlasks, contentHeight);
+            Store.retryCount -= 1;
+            retryCount.text = "" + Store.retryCount;
+        }
     }
 
     void RefreshScene()

@@ -193,5 +193,18 @@ public class Flask : MonoBehaviour
     public void Clear()
     {
         GetComponentInChildren<Container>().ClearContents();
+        colors = new List<Color>();
+        if (GetComponent<BoxCollider>() == null)
+        {
+            gameObject.AddComponent<BoxCollider>();
+        }
+    }
+
+    public void FillWithList(List<Color> listColor, float height)
+    {
+        for (int i = 0; i < listColor.Count; i++)
+        {
+            AddColor(listColor[i], height);
+        }
     }
 }

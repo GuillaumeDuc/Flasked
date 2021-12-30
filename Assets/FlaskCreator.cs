@@ -33,10 +33,10 @@ public static class FlaskCreator
         int nbFlask = GetNbFlask(level);
         List<Color> colorList = GetColorFullContent(nbFlask - nbEmpty, nbContent, nbEmpty);
         float xStep = .08f;
-        float yStep = .42f;
+        float yStep = .45f;
         float minX = .2f;
         float maxX = 1 - minX;
-        float maxHeight = .6f;
+        float maxHeight = .7f;
         Vector3 pos = new Vector3(minX, maxHeight, 10);
 
         for (int i = 0; i < nbFlask; i++)
@@ -100,5 +100,15 @@ public static class FlaskCreator
     static int GetNbFlask(int level)
     {
         return 4 + ((int)(level / 3) * 2);
+    }
+
+    public static void RefillFlask(List<Flask> flasks, List<List<Color>> savedList, float height)
+    {
+        // Remove content and add new content
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            flasks[i].Clear();
+            flasks[i].FillWithList(savedList[i], height);
+        }
     }
 }

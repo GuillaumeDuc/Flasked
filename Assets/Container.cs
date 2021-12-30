@@ -36,6 +36,11 @@ public class Container : MonoBehaviour
         return GetTopContent() != null;
     }
 
+    public ContentFlask[] GetContents()
+    {
+        return GetComponentsInChildren<ContentFlask>();
+    }
+
     public ContentFlask GetTopContent()
     {
         return GetContentAt(transform.childCount - 1);
@@ -64,7 +69,7 @@ public class Container : MonoBehaviour
         ContentFlask[] contents = GetComponentsInChildren<ContentFlask>();
         for (int i = 0; i < contents.Length; i++)
         {
-            Destroy(contents[i]);
+            DestroyImmediate(contents[i].gameObject);
         }
     }
 }
