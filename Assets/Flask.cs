@@ -25,6 +25,11 @@ public class Flask : MonoBehaviour
             ContentFlask content = container.AddContentFlask(.1f, height, color, material, nbPoints);
             // Color match mesh index
             colors.Add(color);
+
+            if (IsCleared())
+            {
+                SetClearedMaterial();
+            }
         }
     }
 
@@ -180,7 +185,7 @@ public class Flask : MonoBehaviour
         Destroy(GetComponent<BoxCollider>());
     }
 
-    public void SetClearedMaterial(int intensity)
+    public void SetClearedMaterial(int intensity = 10)
     {
         if (!clearedState)
         {

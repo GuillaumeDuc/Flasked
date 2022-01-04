@@ -109,7 +109,7 @@ public class AnimFlask : MonoBehaviour
             // Set cleared mat if flask is cleared
             if (flask.IsCleared())
             {
-                flask.SetClearedMaterial(10);
+                flask.SetClearedMaterial();
             }
         }
         UpdateContents();
