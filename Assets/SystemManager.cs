@@ -10,6 +10,7 @@ public class SystemManager : MonoBehaviour
     public int nbEmpty = 2;
     public float contentHeight = 1;
     public int nbRetry = 3;
+    public int nbUndo = 5;
     public GameObject flaskPrefab;
     public Button RefreshButton;
     public Button RetryButton;
@@ -17,6 +18,7 @@ public class SystemManager : MonoBehaviour
     public GameObject EndPanel;
     public Text textCount;
     public Text retryCount;
+    public Text undoCount;
     private List<Flask> flasks = new List<Flask>();
     private Flask selectedFlask;
     void Start()
@@ -30,6 +32,7 @@ public class SystemManager : MonoBehaviour
     {
         InitRefreshButton();
         InitRetryButton();
+        InitUndoButton();
     }
 
     void InitRefreshButton()
@@ -42,17 +45,25 @@ public class SystemManager : MonoBehaviour
         RetryButton.onClick.AddListener(RetryScene);
     }
 
+    void InitUndoButton()
+    {
+        UndoButton.onClick.AddListener(UndoMove);
+    }
+
     void SetInfo()
     {
         textCount.text = "" + (Store.level + 1);
         retryCount.text = "" + Store.retryCount;
+        undoCount.text = "" + Store.undoCount;
     }
 
     void Init()
     {
         bool solved;
         int tentative = 1;
+        // Create flasks
         flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, nbContent, nbEmpty, contentHeight);
+        //Try to solve them
         solved = Solver.Solve(flasks);
         while (!solved)
         {
@@ -60,9 +71,11 @@ public class SystemManager : MonoBehaviour
             solved = Solver.Solve(flasks);
             tentative += 1;
         }
-
+        // Save flasks in store
         Store.SaveFlasksBeginLevel(flasks);
         Store.retryCount = nbRetry;
+        Store.SaveCurrentScene(flasks);
+        Store.undoCount = nbUndo;
 
         Debug.Log(tentative);
     }
@@ -70,6 +83,11 @@ public class SystemManager : MonoBehaviour
     bool SpillBottle(Flask giver, Flask receiver)
     {
         bool spilled = (giver != null) ? giver.SpillTo(receiver) : false;
+        // If spilled, save current scene
+        if (spilled)
+        {
+            Store.SaveCurrentScene(flasks);
+        }
         return spilled;
     }
 
@@ -113,6 +131,30 @@ public class SystemManager : MonoBehaviour
             FlaskCreator.RefillFlask(flasks, Store.savedFlasks, contentHeight);
             Store.retryCount -= 1;
             retryCount.text = "" + Store.retryCount;
+        }
+    }
+
+    void UndoMove()
+    {
+        bool isMoving = false;
+        // Can't undo if a flask is moving
+        flasks.ForEach(flask =>
+        {
+            if (flask.IsMoving())
+            {
+                isMoving = true;
+            }
+        });
+        if (!isMoving && Store.undoCount > 0 && Store.savedScene.Count > 1)
+        {
+            // Get previous scene 
+            List<List<Color>> previousScene = Store.savedScene[Store.savedScene.Count - 2];
+            // Set previous scene
+            FlaskCreator.RefillFlask(flasks, previousScene, contentHeight);
+            // Remove current scene
+            Store.savedScene.RemoveAt(Store.savedScene.Count - 1);
+            Store.undoCount -= 1;
+            undoCount.text = "" + Store.undoCount;
         }
     }
 
