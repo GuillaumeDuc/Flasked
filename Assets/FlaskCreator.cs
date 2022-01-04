@@ -36,7 +36,7 @@ public static class FlaskCreator
         float yStep = .45f;
         float minX = .2f;
         float maxX = 1 - minX;
-        float maxHeight = .7f;
+        float maxHeight = .65f;
         Vector3 pos = new Vector3(minX, maxHeight, 10);
 
         for (int i = 0; i < nbFlask; i++)

@@ -198,6 +198,7 @@ public class Flask : MonoBehaviour
         {
             gameObject.AddComponent<BoxCollider>();
         }
+        clearedState = false;
     }
 
     public void FillWithList(List<Color> listColor, float height)
