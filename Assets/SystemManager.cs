@@ -21,8 +21,15 @@ public class SystemManager : MonoBehaviour
     public Text undoCount;
     private List<Flask> flasks = new List<Flask>();
     private Flask selectedFlask;
+    private Store Store;
     void Start()
     {
+        // Load store from file 
+        // Store store = new Store();
+        // SaveDataManager.LoadJsonData(store);
+        Store = new Store();
+        Store.FetchData();
+
         Init();
         SetInfo();
         InitButtons();
@@ -63,21 +70,32 @@ public class SystemManager : MonoBehaviour
         int tentative = 1;
         // Create flasks
         flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, nbContent, nbEmpty, contentHeight);
-        //Try to solve them
-        solved = Solver.Solve(flasks);
-        while (!solved)
+        // Load existing flasks 
+        if (Store.savedScenes.Count > 0)
+        {
+            // Load top scenes from saved scenes
+            FlaskCreator.RefillFlask(flasks, Store.savedScenes[Store.savedScenes.Count - 1].ToList(), contentHeight);
+        }
+        else
         {
             FlaskCreator.FillFlasksRandom(flasks, flasks.Count, nbContent, nbEmpty, contentHeight);
+            //Try to solve them
             solved = Solver.Solve(flasks);
-            tentative += 1;
+            while (!solved)
+            {
+                FlaskCreator.FillFlasksRandom(flasks, flasks.Count, nbContent, nbEmpty, contentHeight);
+                solved = Solver.Solve(flasks);
+                tentative += 1;
+            }
+            // Save flasks in store
+            Store.SaveFlasksBeginLevel(flasks);
+            Store.retryCount = nbRetry;
+            Store.SaveCurrentScene(flasks);
+            Store.undoCount = nbUndo;
+            Store.SaveData();
         }
-        // Save flasks in store
-        Store.SaveFlasksBeginLevel(flasks);
-        Store.retryCount = nbRetry;
-        Store.SaveCurrentScene(flasks);
-        Store.undoCount = nbUndo;
 
-        Debug.Log(tentative);
+        Debug.Log("Tentative " + tentative);
     }
 
     bool SpillBottle(Flask giver, Flask receiver)
@@ -87,6 +105,7 @@ public class SystemManager : MonoBehaviour
         if (spilled)
         {
             Store.SaveCurrentScene(flasks);
+            Store.SaveData();
         }
         return spilled;
     }
@@ -110,7 +129,7 @@ public class SystemManager : MonoBehaviour
 
     IEnumerator NextLevel()
     {
-        Store.level += 1;
+        Store.NextLevel();
         yield return new WaitForSeconds(3.5f);
         ReloadScene();
     }
@@ -128,8 +147,8 @@ public class SystemManager : MonoBehaviour
         });
         if (!isMoving && Store.retryCount > 0)
         {
-            FlaskCreator.RefillFlask(flasks, Store.savedFlasks, contentHeight);
-            Store.retryCount -= 1;
+            FlaskCreator.RefillFlask(flasks, Store.savedFlasks.ToList(), contentHeight);
+            Store.RetryScene();
             retryCount.text = "" + Store.retryCount;
         }
     }
@@ -145,22 +164,23 @@ public class SystemManager : MonoBehaviour
                 isMoving = true;
             }
         });
-        if (!isMoving && Store.undoCount > 0 && Store.savedScene.Count > 1)
+        if (!isMoving && Store.undoCount > 0 && Store.savedScenes.Count > 1)
         {
             // Get previous scene 
-            List<List<Color>> previousScene = Store.savedScene[Store.savedScene.Count - 2];
+            List<List<Color>> previousScene = Store.savedScenes[Store.savedScenes.Count - 2].ToList();
             // Set previous scene
             FlaskCreator.RefillFlask(flasks, previousScene, contentHeight);
             // Remove current scene
-            Store.savedScene.RemoveAt(Store.savedScene.Count - 1);
+            Store.savedScenes.RemoveAt(Store.savedScenes.Count - 1);
             Store.undoCount -= 1;
             undoCount.text = "" + Store.undoCount;
+            Store.SaveData();
         }
     }
 
     void RefreshScene()
     {
-        Store.level = 0;
+        Store.Reset();
         ReloadScene();
     }
 

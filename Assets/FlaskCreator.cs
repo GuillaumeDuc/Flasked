@@ -51,18 +51,6 @@ public static class FlaskCreator
             Flask flask = flaskGO.GetComponent<Flask>();
             flasks.Add(flask);
             flask.InitFlask(7 + i, nbContent);
-            // Fill flask randomly
-            if (i < nbFlask - nbEmpty)
-            {
-                // Fill until it reaches top
-                for (int j = 0; j < nbContent; j++)
-                {
-                    int colorIndex = Random.Range(0, colorList.Count);
-                    Color color = colorList[colorIndex];
-                    colorList.RemoveAt(colorIndex);
-                    flask.AddColor(color, contentHeight);
-                }
-            }
         }
         return flasks;
     }
