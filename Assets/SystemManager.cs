@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class SystemManager : MonoBehaviour
 {
     public int nbContent = 4;
-    public int nbEmpty = 2;
     public float contentHeight = 1;
     public int nbRetry = 3;
     public int nbUndo = 5;
@@ -24,9 +23,7 @@ public class SystemManager : MonoBehaviour
     private Store Store;
     void Start()
     {
-        // Load store from file 
-        // Store store = new Store();
-        // SaveDataManager.LoadJsonData(store);
+        // Load store from file
         Store = new Store();
         Store.FetchData();
 
@@ -69,7 +66,7 @@ public class SystemManager : MonoBehaviour
         bool solved;
         int tentative = 1;
         // Create flasks
-        flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, nbContent, nbEmpty, contentHeight);
+        flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, nbContent, Store.nbEmptyFlask, contentHeight);
         // Load existing flasks 
         if (Store.savedScenes.Count > 0)
         {
@@ -78,12 +75,19 @@ public class SystemManager : MonoBehaviour
         }
         else
         {
-            FlaskCreator.FillFlasksRandom(flasks, flasks.Count, nbContent, nbEmpty, contentHeight);
+            FlaskCreator.FillFlasksRandom(flasks, nbContent, Store.nbEmptyFlask, contentHeight);
             //Try to solve them
             solved = Solver.Solve(flasks);
-            while (!solved)
+            while (!solved && tentative < 6)
             {
-                FlaskCreator.FillFlasksRandom(flasks, flasks.Count, nbContent, nbEmpty, contentHeight);
+                // 2 tentative, then add 1 empty flask
+                if (tentative == 2)
+                {
+                    FlaskCreator.ClearFlasks(flasks);
+                    Store.nbEmptyFlask += 1;
+                    tentative = 0;
+                }
+                FlaskCreator.FillFlasksRandom(flasks, nbContent, Store.nbEmptyFlask, contentHeight);
                 solved = Solver.Solve(flasks);
                 tentative += 1;
             }

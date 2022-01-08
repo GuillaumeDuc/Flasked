@@ -55,10 +55,10 @@ public static class FlaskCreator
         return flasks;
     }
 
-    public static void FillFlasksRandom(List<Flask> flasks, int nbFlask, int nbContent, int nbEmpty, float contentHeight)
+    public static void FillFlasksRandom(List<Flask> flasks, int nbContent, int nbEmpty, float contentHeight)
     {
-        List<Color> colorList = GetColorFullContent(nbFlask - nbEmpty, nbContent, nbEmpty);
-        for (int i = 0; i < nbFlask - nbEmpty; i++)
+        List<Color> colorList = GetColorFullContent(flasks.Count - nbEmpty, nbContent, nbEmpty);
+        for (int i = 0; i < flasks.Count - nbEmpty; i++)
         {
             flasks[i].Clear();
             for (int j = 0; j < nbContent; j++)
@@ -68,6 +68,14 @@ public static class FlaskCreator
                 colorList.RemoveAt(colorIndex);
                 flasks[i].AddColor(color, contentHeight);
             }
+        }
+    }
+
+    public static void ClearFlasks(List<Flask> flasks)
+    {
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            flasks[i].Clear();
         }
     }
 

@@ -16,6 +16,7 @@ public static class Solver
         Debug.Log("Size " + size);
         Node node = new Node();
         GetClearedNode(root, ref node);
+        // PrintSolution(node);
         return node.cleared;
     }
 
@@ -60,6 +61,24 @@ public static class Solver
             }
         }
     }
+
+    static void PrintSolution(Node clearedNode)
+    {
+        List<Node> clearedList = new List<Node>();
+        Node current = clearedNode;
+        while (current.previous != null)
+        {
+            clearedList.Add(current);
+            current = current.previous;
+        }
+        clearedList.Reverse();
+        Debug.Log("----- Solver -----");
+        clearedList.ForEach(node =>
+        {
+            Debug.Log("selected : " + node.selectedFlask.position + " target : " + node.targetFlask.position);
+        });
+    }
+
     static void dfs(Node root, ref int size)
     {
         for (int i = 0; i < root.next.Count; i++)

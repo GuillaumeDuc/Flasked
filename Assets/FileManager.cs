@@ -25,6 +25,11 @@ public static class FileManager
     public static bool LoadFromFile(string a_FileName, out string result)
     {
         var fullPath = Path.Combine(Application.persistentDataPath, a_FileName);
+        if (!File.Exists(fullPath))
+        {
+            result = "";
+            return false;
+        }
 
         try
         {

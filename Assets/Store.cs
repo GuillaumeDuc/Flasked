@@ -8,6 +8,9 @@ public class Store
     public int level = 0;
     public ListFlask savedFlasks = new ListFlask();
     public List<ListFlask> savedScenes = new List<ListFlask>();
+    public int retryCount = 3;
+    public int undoCount = 5;
+    public int nbEmptyFlask = 1;
 
     [System.Serializable]
     public class ListFlask
@@ -46,9 +49,6 @@ public class Store
             }
         }
     }
-
-    public int retryCount = 3;
-    public int undoCount = 5;
 
     public void SaveFlasksBeginLevel(List<Flask> flasks)
     {
