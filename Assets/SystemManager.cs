@@ -8,6 +8,7 @@ public class SystemManager : MonoBehaviour
 {
     public int nbContent = 4;
     public float contentHeight = 1;
+    public int nbEmpty = 1;
     public int nbRetry = 3;
     public int nbUndo = 5;
     public GameObject flaskPrefab;
@@ -96,6 +97,7 @@ public class SystemManager : MonoBehaviour
             Store.retryCount = nbRetry;
             Store.SaveCurrentScene(flasks);
             Store.undoCount = nbUndo;
+            Store.nbEmptyFlask = nbEmpty;
             Store.SaveData();
         }
 
