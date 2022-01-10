@@ -45,6 +45,16 @@ public class ContentFlask : MonoBehaviour
         this.currentHeight = height;
     }
 
+    public void SetOrderMoving()
+    {
+        GetComponent<Renderer>().sortingOrder = GetComponentInParent<Container>().gameObject.layer;
+    }
+
+    public void SetDefaultOrder()
+    {
+        GetComponent<Renderer>().sortingOrder = 0;
+    }
+
     public void UpdateContent(float eulerAngle = 0, float time = 0)
     {
         Mesh mesh = GetComponent<MeshFilter>().mesh;

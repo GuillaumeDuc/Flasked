@@ -116,6 +116,16 @@ public class Flask : MonoBehaviour
         return animFlask.IsFilling();
     }
 
+    public void SetOrderMoving()
+    {
+        GetComponent<Renderer>().sortingOrder = GetComponentInChildren<Container>().gameObject.layer;
+    }
+
+    public void SetDefaultOrder()
+    {
+        GetComponent<Renderer>().sortingOrder = 1;
+    }
+
     private bool HasEnoughSpace(Flask flask, List<Color> colorSpill)
     {
         int size = flask.GetColors().Count + colorSpill.Count;

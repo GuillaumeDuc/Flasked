@@ -72,4 +72,22 @@ public class Container : MonoBehaviour
             DestroyImmediate(contents[i].gameObject);
         }
     }
+
+    public void SetOrderMovingContents()
+    {
+        ContentFlask[] contents = GetContents();
+        for (int i = 0; i < contents.Length; i++)
+        {
+            contents[i].SetOrderMoving();
+        }
+    }
+
+    public void SetDefaultOrderContents()
+    {
+        ContentFlask[] contents = GetContents();
+        for (int i = 0; i < contents.Length; i++)
+        {
+            contents[i].SetDefaultOrder();
+        }
+    }
 }

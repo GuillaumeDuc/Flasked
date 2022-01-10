@@ -42,6 +42,10 @@ public class AnimFlask : MonoBehaviour
         this.targetFlask = targetFlask;
         this.targetPosition = new Vector3(targetFlask.gameObject.transform.position.x - 2f, targetFlask.gameObject.transform.position.y + 3f);
 
+        // Change order contents & flask
+        flask.SetOrderMoving();
+        flask.GetComponentInChildren<Container>().SetOrderMovingContents();
+
         startTime = Time.time;
         // Start animation
         move = true;
@@ -238,6 +242,9 @@ public class AnimFlask : MonoBehaviour
             {
                 startTime = Time.time;
                 moveBack = false;
+                // Change order contents & flask
+                flask.SetDefaultOrder();
+                flask.GetComponentInChildren<Container>().SetDefaultOrderContents();
             }
         }
 
