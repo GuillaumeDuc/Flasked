@@ -21,6 +21,11 @@ public class AnimFlask : MonoBehaviour
         return move || moveBack || rotateTo || rotateBack;
     }
 
+    public bool IsFilling()
+    {
+        return fill;
+    }
+
     public void MoveSelected()
     {
         gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + selectedPositionHeight);

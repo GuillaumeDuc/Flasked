@@ -206,11 +206,12 @@ public class SystemManager : MonoBehaviour
             {
                 Flask clickedFlask = hit.transform.gameObject.GetComponent<Flask>();
                 bool spilled = false;
-                // GameObject clicked is flask
+                // GameObject clicked is flask and is not moving
                 if (clickedFlask != null && !clickedFlask.IsMoving())
                 {
-                    // Flask clicked is not already selected and is not moving
-                    if (!clickedFlask.Equals(selectedFlask))
+                    // Flask clicked is not already selected and selected flask is not filling
+                    bool selectedIsFilling = selectedFlask == null ? false : selectedFlask.IsFilling();
+                    if (!clickedFlask.Equals(selectedFlask) && !selectedIsFilling)
                     {
                         // Clicked flask, try to spill
                         spilled = SpillBottle(selectedFlask, clickedFlask);

@@ -111,6 +111,11 @@ public class Flask : MonoBehaviour
         return animFlask.IsMoving();
     }
 
+    public bool IsFilling()
+    {
+        return animFlask.IsFilling();
+    }
+
     private bool HasEnoughSpace(Flask flask, List<Color> colorSpill)
     {
         int size = flask.GetColors().Count + colorSpill.Count;
