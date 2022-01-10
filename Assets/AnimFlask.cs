@@ -46,6 +46,9 @@ public class AnimFlask : MonoBehaviour
         flask.SetOrderMoving();
         flask.GetComponentInChildren<Container>().SetOrderMovingContents();
 
+        // Disable colliders when moving
+        flask.EnableAllCollider(false);
+
         startTime = Time.time;
         // Start animation
         move = true;
@@ -206,6 +209,11 @@ public class AnimFlask : MonoBehaviour
                 rotateTo = true;
                 move = false;
                 spill = true;
+
+                // Re-enable colliders when stopped moving
+                flask.EnableAllCollider();
+                // Change content layer to spillig content (7)
+                flask.GetComponentInChildren<Container>().ChangeContentsLayer(7);
             }
         }
         if (rotateTo) // Rotate to Flask
@@ -233,6 +241,11 @@ public class AnimFlask : MonoBehaviour
                 startTime = Time.time;
                 rotateBack = false;
                 moveBack = true;
+
+                // Disable colliders when moving
+                flask.EnableAllCollider(false);
+                // Change content layer to content (6)
+                flask.GetComponentInChildren<Container>().ChangeContentsLayer(6);
             }
         }
         if (moveBack)
@@ -242,6 +255,9 @@ public class AnimFlask : MonoBehaviour
             {
                 startTime = Time.time;
                 moveBack = false;
+
+                // Re-enable colliders when stopped moving
+                flask.EnableAllCollider();
                 // Change order contents & flask
                 flask.SetDefaultOrder();
                 flask.GetComponentInChildren<Container>().SetDefaultOrderContents();

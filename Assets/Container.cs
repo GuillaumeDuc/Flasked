@@ -19,10 +19,14 @@ public class Container : MonoBehaviour
         // Set up game object with position
         GameObject meshObj = new GameObject("content");
         meshObj.transform.parent = gameObject.transform;
+        // Content layer
         meshObj.layer = 6;
         Bounds bounds = GetComponent<EdgeCollider2D>().bounds;
         Vector2 highestPoint = new Vector2(bounds.center.x, bounds.center.y + bounds.extents.y);
-        RaycastHit2D hit = Physics2D.Raycast(highestPoint, Vector2.down);
+        // Hit only content layer & flask colliders layer
+        int layerMask = 1 << gameObject.layer;
+        layerMask += 1 << 6;
+        RaycastHit2D hit = Physics2D.Raycast(highestPoint, Vector2.down, 100, layerMask);
         ContentFlask content = meshObj.AddComponent<ContentFlask>();
         if (hit.collider != null)
         {
@@ -88,6 +92,25 @@ public class Container : MonoBehaviour
         for (int i = 0; i < contents.Length; i++)
         {
             contents[i].SetDefaultOrder();
+        }
+    }
+
+    public void ChangeContentsLayer(int newLayer)
+    {
+        ContentFlask[] contents = GetContents();
+        for (int i = 0; i < contents.Length; i++)
+        {
+            contents[i].gameObject.layer = newLayer;
+        }
+    }
+
+    public void EnableCollider(bool isEnabled)
+    {
+        GetComponent<EdgeCollider2D>().enabled = isEnabled;
+        ContentFlask[] contents = GetContents();
+        for (int i = 0; i < contents.Length; i++)
+        {
+            contents[i].GetComponent<EdgeCollider2D>().enabled = isEnabled;
         }
     }
 }

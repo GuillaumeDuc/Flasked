@@ -196,6 +196,7 @@ public class ContentFlask : MonoBehaviour
 
     int GetContentLayerMask()
     {
+        // Get only associated content layer, content layers start at 8
         return 1 << GetComponentInParent<Container>().gameObject.layer;
         // int layerMask = 1 << 6;
         // return ~layerMask;

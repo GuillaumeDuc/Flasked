@@ -50,7 +50,7 @@ public static class FlaskCreator
             }
             Flask flask = flaskGO.GetComponent<Flask>();
             flasks.Add(flask);
-            flask.InitFlask(7 + i, nbContent);
+            flask.InitFlask(8 + i, nbContent);
         }
         return flasks;
     }

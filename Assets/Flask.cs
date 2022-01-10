@@ -200,6 +200,12 @@ public class Flask : MonoBehaviour
         Destroy(GetComponent<BoxCollider>());
     }
 
+    public void EnableAllCollider(bool isEnabled = true)
+    {
+        GetComponent<BoxCollider>().enabled = isEnabled;
+        GetComponentInChildren<Container>().EnableCollider(isEnabled);
+    }
+
     public void SetClearedMaterial(int intensity = 10)
     {
         if (!clearedState)
