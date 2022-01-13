@@ -14,7 +14,7 @@ public static class FlaskCreator
         Color.gray,
         new Color(.5f,.3f,.5f),
         new Color(.9f,0,.3f),
-        new Color(.3f,.3f,5f),
+        new Color(.3f,.3f,.5f),
         new Color(.3f,.9f,.9f),
         new Color(.8f,.5f,.3f),
         new Color(.3f,.9f,.2f),
@@ -25,13 +25,32 @@ public static class FlaskCreator
         new Color(.1f,.3f,.7f),
         new Color(.2f,.5f,.2f),
         new Color(.9f,.7f,.7f),
+        new Color(.25f,.25f,.25f),
+        new Color(.25f,.0f,0),
+        new Color(0,.25f,0),
+        new Color(0,.25f,.25f),
+        new Color(.75f,.75f,.75f),
+        new Color(.85f,0,.5f),
+        new Color(.25f,.5f,.8f),
+        new Color(.8f,.8f,.15f),
+        new Color(0,.45f,.35f),
+        new Color(.35f,.35f,.95f),
+        new Color(0,1,.25f),
+        new Color(1,1,.25f),
     };
+
+    public static void DeleteFlasks(List<Flask> flasks)
+    {
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            GameObject.DestroyImmediate(flasks[i].gameObject);
+        }
+    }
 
     public static List<Flask> CreateFlasks(GameObject prefab, int level, int nbContent, int nbEmpty, float contentHeight)
     {
         List<Flask> flasks = new List<Flask>();
         int nbFlask = GetNbFlask(level);
-        List<Color> colorList = GetColorFullContent(nbFlask - nbEmpty, nbContent, nbEmpty);
         float xStep = .08f;
         float yStep = .45f;
         float minX = .2f;
@@ -55,20 +74,26 @@ public static class FlaskCreator
         return flasks;
     }
 
-    public static void FillFlasksRandom(List<Flask> flasks, int nbContent, int nbEmpty, float contentHeight)
+    private static List<List<Color>> GetRandomScene(int size, int nbContent, int nbEmpty)
     {
-        List<Color> colorList = GetColorFullContent(flasks.Count - nbEmpty, nbContent, nbEmpty);
-        for (int i = 0; i < flasks.Count - nbEmpty; i++)
+        System.Random rand = new System.Random();
+        List<List<Color>> listFlask = new List<List<Color>>();
+        List<Color> colorList = GetColorFullContent(size - nbEmpty, nbContent, nbEmpty);
+        for (int i = 0; i < size; i++)
         {
-            flasks[i].Clear();
-            for (int j = 0; j < nbContent; j++)
+            listFlask.Add(new List<Color>());
+            if (i < size - nbEmpty)
             {
-                int colorIndex = Random.Range(0, colorList.Count);
-                Color color = colorList[colorIndex];
-                colorList.RemoveAt(colorIndex);
-                flasks[i].AddColor(color, contentHeight);
+                for (int j = 0; j < nbContent; j++)
+                {
+                    int colorIndex = rand.Next(0, colorList.Count);
+                    Color color = colorList[colorIndex];
+                    colorList.RemoveAt(colorIndex);
+                    listFlask[i].Add(color);
+                }
             }
         }
+        return listFlask;
     }
 
     public static void ClearFlasks(List<Flask> flasks)
@@ -93,7 +118,7 @@ public static class FlaskCreator
         return colorList;
     }
 
-    static int GetNbFlask(int level)
+    public static int GetNbFlask(int level)
     {
         return 4 + ((int)(level / 3) * 2);
     }
@@ -106,5 +131,81 @@ public static class FlaskCreator
             flasks[i].Clear();
             flasks[i].FillWithList(savedList[i], height);
         }
+    }
+
+    public static List<List<Color>> GetSolvedRandomFlasks(int size, int nbContent, ref int nbEmpty)
+    {
+        // Random scene
+        List<List<Color>> listColorFlasks = GetRandomScene(size, nbContent, nbEmpty);
+        //Try to solve them
+        bool solved = Solver.Solve(listColorFlasks, nbContent);
+        int tentative = 1;
+        while (!solved)
+        {
+            // 3 tentative, then add 1 empty flask
+            if (tentative == 3)
+            {
+                nbEmpty += 1;
+                tentative = 0;
+            }
+            listColorFlasks = FlaskCreator.GetRandomScene(size, nbContent, nbEmpty);
+            solved = Solver.Solve(listColorFlasks, nbContent);
+            tentative += 1;
+        }
+        return listColorFlasks;
+    }
+
+    public static List<List<Color>> BenchMark()
+    {
+        // Random scene
+        List<List<Color>> listColorFlasks = GetClearable();
+        LogFlasks(listColorFlasks);
+        //Try to solve them
+        bool solved = Solver.Solve(listColorFlasks, 4);
+        return listColorFlasks;
+    }
+
+    static List<List<Color>> GetClearable()
+    {
+        return new List<List<Color>>() {
+            new List<Color>(){ new Color(.5f,.3f,.5f), new Color(1,0,1), new Color(.1f,.3f,.7f), new Color(.3f,.3f,.5f)},
+            new List<Color>(){ new Color(.6f,.7f,.1f), new Color(1,0,1), new Color(1,.9f,0), new Color(1,.9f,0)},
+            new List<Color>(){ new Color(.5f,.3f,.5f), new Color(.1f,.3f,.7f), new Color(.8f,.5f,.3f), new Color(.8f,.5f,.3f)},
+            new List<Color>(){ new Color(.9f,.9f,.1f), new Color(.9f,0,.3f), new Color(1,1,1), new Color(1,0,0)},
+            new List<Color>(){ new Color(1,.9f,0), new Color(.3f,.3f,.5f), new Color(.3f,.9f,.9f), new Color(.6f,.7f,.1f)},
+            new List<Color>(){ new Color(.3f,.9f,.2f), new Color(0,1,1), new Color(.5f,.5f,.3f), new Color(.9f,.9f,.1f)},
+            new List<Color>(){ new Color(1,0,1), new Color(.5f,.5f,.5f), new Color(.9f,0,.3f), new Color(0,1,0)},
+            new List<Color>(){  new Color(1,1,1), new Color(1,1,1), new Color(.2f,.2f,.5f), new Color(.5f,.5f,.3f)},
+
+            new List<Color>(){ new Color(.2f,.2f,.5f), new Color(.6f,.7f,.1f), new Color(.3f,.9f,.2f), new Color(0,1,0)},
+            new List<Color>(){ new Color(.2f,.2f,.5f), new Color(.3f,.3f,.5f), new Color(0,1,1), new Color(0,1,1)},
+            new List<Color>(){ new Color(.1f,.3f,.7f), new Color(.5f,.5f,.5f), new Color(1,0,0), new Color(.3f,.9f,.2f)},
+            new List<Color>(){ new Color(.3f,.9f,.9f), new Color(.5f,.3f,.5f), new Color(0,1,0), new Color(.2f,.2f,.5f)},
+            new List<Color>(){ new Color(1,0,0), new Color(.3f,.3f,.5f), new Color(.8f,.5f,.3f), new Color(.9f,0,.3f)},
+            new List<Color>(){ new Color(.3f,.9f,.9f), new Color(.8f,.5f,.3f), new Color(1,.9f,0), new Color(.5f,.5f,.5f)},
+            new List<Color>(){ new Color(.3f,.9f,.2f), new Color(.5f,.5f,.5f), new Color(.6f,.7f,.1f), new Color(.5f,.5f,.3f)},
+            new List<Color>(){ new Color(0,1,1), new Color(.3f,.9f,.9f), new Color(.5f,.5f,.3f), new Color(.5f,.3f,.5f)},
+
+            new List<Color>(){ new Color(0,1,0), new Color(.1f,.3f,.7f), new Color(.9f,.9f,.1f), new Color(.9f,.9f,.1f)},
+            new List<Color>(){ new Color(1,1,1), new Color(1,0,1), new Color(1,0,0), new Color(.9f,0,.3f)},
+
+            new List<Color>(),
+            new List<Color>(),
+        };
+    }
+
+    public static void LogFlasks(List<List<Color>> flasks)
+    {
+        Debug.Log(" -------- LIST -----------");
+        flasks.ForEach(f =>
+        {
+            string colors = "";
+            f.ForEach(color =>
+            {
+                colors += color + " | ";
+            });
+            Debug.Log(colors);
+        });
+        Debug.Log(" -------- END -----------");
     }
 }

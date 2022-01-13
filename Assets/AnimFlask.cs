@@ -28,7 +28,10 @@ public class AnimFlask : MonoBehaviour
 
     public void MoveSelected()
     {
-        gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + selectedPositionHeight);
+        if (!fill)
+        {
+            gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + selectedPositionHeight);
+        }
     }
 
     public void MoveUnselected()

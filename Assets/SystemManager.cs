@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Threading;
 
 public class SystemManager : MonoBehaviour
 {
@@ -22,6 +23,9 @@ public class SystemManager : MonoBehaviour
     private List<Flask> flasks = new List<Flask>();
     private Flask selectedFlask;
     private Store Store;
+    private List<List<Color>> nextSceneColors = new List<List<Color>>();
+    private Thread searchNextSceneThread;
+
     void Start()
     {
         // Load store from file
@@ -35,14 +39,14 @@ public class SystemManager : MonoBehaviour
 
     void InitButtons()
     {
-        InitRefreshButton();
+        InitResetButton();
         InitRetryButton();
         InitUndoButton();
     }
 
-    void InitRefreshButton()
+    void InitResetButton()
     {
-        RefreshButton.onClick.AddListener(RefreshScene);
+        RefreshButton.onClick.AddListener(ResetScene);
     }
 
     void InitRetryButton()
@@ -64,44 +68,48 @@ public class SystemManager : MonoBehaviour
 
     void Init()
     {
-        bool solved;
-        int tentative = 1;
-        // Create flasks
-        flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, nbContent, Store.nbEmptyFlask, contentHeight);
-        // Load existing flasks 
+        // Create flasks GameObjects
+        flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, Store.nbContent, Store.nbEmptyFlask, contentHeight);
+
+        // Load save
         if (Store.savedScenes.Count > 0)
         {
             // Load top scenes from saved scenes
             FlaskCreator.RefillFlask(flasks, Store.savedScenes[Store.savedScenes.Count - 1].ToList(), contentHeight);
         }
-        else
+        // Load previously generated next scene
+        else if (nextSceneColors.Count > 0)
         {
-            FlaskCreator.FillFlasksRandom(flasks, nbContent, Store.nbEmptyFlask, contentHeight);
-            //Try to solve them
-            solved = Solver.Solve(flasks);
-            while (!solved && tentative < 6)
-            {
-                // 2 tentative, then add 1 empty flask
-                if (tentative == 2)
-                {
-                    FlaskCreator.ClearFlasks(flasks);
-                    Store.nbEmptyFlask += 1;
-                    tentative = 0;
-                }
-                FlaskCreator.FillFlasksRandom(flasks, nbContent, Store.nbEmptyFlask, contentHeight);
-                solved = Solver.Solve(flasks);
-                tentative += 1;
-            }
-            // Save flasks in store
+            FlaskCreator.RefillFlask(flasks, nextSceneColors, contentHeight);
+            // Init flask data in store
             Store.SaveFlasksBeginLevel(flasks);
             Store.retryCount = nbRetry;
             Store.SaveCurrentScene(flasks);
             Store.undoCount = nbUndo;
+            Store.nbContent = nbContent;
+            // Save store
+            Store.SaveData();
+        }
+        // Load scene
+        else
+        {
             Store.nbEmptyFlask = nbEmpty;
+            List<List<Color>> listColorFlasks = FlaskCreator.GetSolvedRandomFlasks(flasks.Count, Store.nbContent, ref Store.nbEmptyFlask);
+            // Fill flasks
+            FlaskCreator.RefillFlask(flasks, listColorFlasks, contentHeight);
+            // Init flask data in store
+            Store.SaveFlasksBeginLevel(flasks);
+            Store.retryCount = nbRetry;
+            Store.SaveCurrentScene(flasks);
+            Store.undoCount = nbUndo;
+            Store.nbContent = nbContent;
+            // Save store
             Store.SaveData();
         }
 
-        Debug.Log("Tentative " + tentative);
+        // Search next scene
+        searchNextSceneThread = new Thread(new ThreadStart(GenerateNextLevel));
+        searchNextSceneThread.Start();
     }
 
     bool SpillBottle(Flask giver, Flask receiver)
@@ -137,6 +145,7 @@ public class SystemManager : MonoBehaviour
     {
         Store.NextLevel();
         yield return new WaitForSeconds(3.5f);
+        // Reload flasks
         ReloadScene();
     }
 
@@ -155,7 +164,8 @@ public class SystemManager : MonoBehaviour
         {
             FlaskCreator.RefillFlask(flasks, Store.savedFlasks.ToList(), contentHeight);
             Store.RetryScene();
-            retryCount.text = "" + Store.retryCount;
+            Store.undoCount = nbUndo;
+            SetInfo();
         }
     }
 
@@ -184,15 +194,33 @@ public class SystemManager : MonoBehaviour
         }
     }
 
-    void RefreshScene()
+    void ResetScene()
     {
+        nextSceneColors = new List<List<Color>>();
         Store.Reset();
         ReloadScene();
     }
 
     void ReloadScene()
     {
-        SceneManager.LoadScene(0);
+        FlaskCreator.DeleteFlasks(flasks);
+        EndPanel.SetActive(false);
+        searchNextSceneThread.Join();
+        Init();
+        SetInfo();
+    }
+
+    void GenerateNextLevel()
+    {
+        Debug.Log("start");
+        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+        // nextSceneColors = FlaskCreator.BenchMark();
+        nextSceneColors = FlaskCreator.GetSolvedRandomFlasks(FlaskCreator.GetNbFlask(Store.level + 1), Store.nbContent, ref Store.nbEmptyFlask);
+        Thread.Sleep(0);
+        stopwatch.Stop();
+        System.TimeSpan ts = stopwatch.Elapsed;
+        Debug.Log("generated in " + ts.Minutes + "m " + ts.Seconds + "s " + ts.Milliseconds + "ms");
     }
 
     void Update()

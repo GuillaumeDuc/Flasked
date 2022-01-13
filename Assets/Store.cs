@@ -11,6 +11,7 @@ public class Store
     public int retryCount = 3;
     public int undoCount = 5;
     public int nbEmptyFlask = 1;
+    public int nbContent = 4;
 
     [System.Serializable]
     public class ListFlask

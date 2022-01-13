@@ -202,8 +202,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nbContent: 4
-  nbEmpty: 1
   contentHeight: 1
+  nbEmpty: 1
   nbRetry: 3
   nbUndo: 5
   flaskPrefab: {fileID: 5964938345780577467, guid: 572c1354d1c078848bc2604ff487d12c, type: 3}

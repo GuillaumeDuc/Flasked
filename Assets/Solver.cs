@@ -5,44 +5,68 @@ using System.Linq;
 
 public static class Solver
 {
-    public static bool Solve(List<Flask> listFlask)
+    public static bool Solve(List<List<Color>> listFlask, int nbContent)
     {
-        List<ObjectFlask> objectFlasks = CreateList(listFlask);
+        List<ObjectFlask> objectFlasks = CreateList(listFlask, nbContent);
         bool stop = false;
         Node root = new Node();
-        ConstructTree(objectFlasks, listFlask.Count * listFlask.Count, 0, ref stop, root);
-        int size = 0;
-        dfs(root, ref size);
-        Debug.Log("Size " + size);
+        List<List<ObjectFlask>> visited = new List<List<ObjectFlask>>() { objectFlasks };
+
+        // NEED TO OPTIMIZE THAT
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        sw.Start();
+        float maxTimeS = listFlask.Count * 10;
+        ConstructTree(objectFlasks, 0, ref stop, root, visited, sw, maxTimeS);
+
+        Debug.Log("visited size " + visited.Count);
         Node node = new Node();
         GetClearedNode(root, ref node);
+        Debug.Log(node.cleared);
         // PrintSolution(node);
         return node.cleared;
     }
 
-    private static void ConstructTree(List<ObjectFlask> list, int maxDepth, int depth, ref bool end, Node current)
+    private static void ConstructTree(List<ObjectFlask> list, int depth, ref bool end, Node current, List<List<ObjectFlask>> visited, System.Diagnostics.Stopwatch sw, float maxTimeS)
     {
-        if (depth < maxDepth && !end)
+        for (int i = 0; i < list.Count; i++)
         {
-            for (int i = 0; i < list.Count; i++)
+            if (end)
+            {
+                break;
+            }
+            for (int j = 0; j < list.Count; j++)
             {
                 if (end)
                 {
                     break;
                 }
 
-                List<ObjectFlask> newList = CreateList(list);
-                ObjectFlask selectedFlask = newList[i];
-
-                // Ignore empty selectedFlask or cleared selected flask or flask containing only one color
-                if (!selectedFlask.IsEmpty() && !selectedFlask.IsCleared())
+                if (list[i].IsCleared())
                 {
-                    ObjectFlask targetFlask = GetBestSpillableFlask(selectedFlask, newList);
-                    // If target flask is empty and selected flask is only one color do nothing
-                    if (targetFlask != null && !(targetFlask.IsEmpty() && selectedFlask.HasOneColor()))
+                    break;
+                }
+
+                if (list[i].IsEmpty())
+                {
+                    break;
+                }
+
+                // If target flask can spill and move is not useless
+                if (list[i].CanSpill(list[j]) && !(list[i].HasOneColor() && list[j].IsEmpty()))
+                {
+                    List<ObjectFlask> newList = CreateList(list);
+                    ObjectFlask selectedFlask = newList[i];
+                    ObjectFlask targetFlask = newList[j];
+
+                    // Spill
+                    selectedFlask.SpillTo(targetFlask);
+                    if (!ExistInList(visited, newList))
                     {
-                        // Spill
-                        selectedFlask.SpillTo(targetFlask);
+                        // TODO : REMOVE THAT
+                        if (sw.Elapsed > System.TimeSpan.FromSeconds(maxTimeS))
+                        {
+                            end = true;
+                        }
 
                         Node nextNode = new Node(selectedFlask, targetFlask);
                         current.AddNext(nextNode);
@@ -52,14 +76,61 @@ public static class Solver
                             nextNode.cleared = true;
                             end = true;
                         }
+
                         if (!end)
                         {
-                            ConstructTree(newList, maxDepth, depth + 1, ref end, nextNode);
+                            visited.Add(newList);
+                            // Debug.Log("depth " + depth);
+                            ConstructTree(newList, depth + 1, ref end, nextNode, visited, sw, maxTimeS);
                         }
                     }
                 }
             }
         }
+    }
+
+    static bool ExistInList(List<List<ObjectFlask>> list, List<ObjectFlask> newList)
+    {
+        bool found = false;
+        if (list.Count == 0)
+        {
+            return found;
+        }
+        int i = 0;
+        while (!found && i < list.Count)
+        {
+            if (IsSameList(list[i], newList))
+            {
+                found = true;
+            }
+            i += 1;
+        }
+        return found;
+    }
+
+    static bool IsSameList(List<ObjectFlask> list1, List<ObjectFlask> list2)
+    {
+        bool equal = true;
+        int i = 0;
+        if (list1.Count == 0 || list2.Count == 0)
+        {
+            return false;
+        }
+
+        if (list1.Count != list2.Count)
+        {
+            return false;
+        }
+
+        while (equal && i < list1.Count)
+        {
+            if (!list1[i].ContainsSameColor(list2[i]))
+            {
+                equal = false;
+            }
+            i += 1;
+        }
+        return equal;
     }
 
     static void PrintSolution(Node clearedNode)
@@ -101,41 +172,28 @@ public static class Solver
         }
     }
 
-    private static ObjectFlask GetBestSpillableFlask(ObjectFlask flask, List<ObjectFlask> list)
-    {
-        int maxColor = -1;
-        ObjectFlask maxFlask = null;
-        list.FindAll(f => flask.CanSpill(f, flask.PopColors())).ForEach(f =>
-        {
-            if (f.PopColors().Count > maxColor)
-            {
-                maxColor = f.PopColors().Count;
-                maxFlask = f;
-            }
-        });
-        return maxFlask;
-    }
-
     static bool ClearedScene(List<ObjectFlask> list)
     {
         bool cleared = true;
-        list.ForEach(flask =>
+        int i = 0;
+        while (cleared && i < list.Count)
         {
-            if (!flask.IsCleared() && !flask.IsEmpty())
+            if (!list[i].IsCleared() && !list[i].IsEmpty())
             {
                 cleared = false;
             }
-        });
+            i += 1;
+        }
         return cleared;
     }
 
-    private static List<ObjectFlask> CreateList(List<Flask> flasks)
+    private static List<ObjectFlask> CreateList(List<List<Color>> flasks, int maxSize)
     {
         List<ObjectFlask> newList = new List<ObjectFlask>();
         int i = 0;
         flasks.ForEach(flask =>
         {
-            ObjectFlask newFlask = new ObjectFlask(flask);
+            ObjectFlask newFlask = new ObjectFlask(flask, maxSize);
             newFlask.position = i;
             newList.Add(newFlask);
             i++;
@@ -195,10 +253,10 @@ public class ObjectFlask
         this.position = objectFlask.position;
     }
 
-    public ObjectFlask(Flask flask)
+    public ObjectFlask(List<Color> flask, int maxSize)
     {
-        this.colors = new List<Color>(flask.GetColors());
-        this.maxSize = flask.GetMaxSize();
+        this.colors = new List<Color>(flask);
+        this.maxSize = maxSize;
     }
 
     private bool HasEnoughSpace(ObjectFlask flask, List<Color> colorSpill)
@@ -251,22 +309,16 @@ public class ObjectFlask
         return popedColors;
     }
 
-    public bool CanSpill(ObjectFlask flask, List<Color> colorsToSpill)
+    public bool CanSpill(ObjectFlask flask)
     {
-        return !this.Equals(flask) && flask != null && HasEnoughSpace(flask, colorsToSpill) && EqualsTopColor(flask) && !IsEmpty();
+        return !this.Equals(flask) && flask != null && HasEnoughSpace(flask, this.PopColors()) && EqualsTopColor(flask) && !IsEmpty();
     }
 
-    public bool SpillTo(ObjectFlask flask)
+    public void SpillTo(ObjectFlask flask)
     {
         List<Color> colorsToSpill = this.PopColors();
-        // Spill only when not in own flask, if flask is not null, if space is enough, if both top color match
-        if (CanSpill(flask, colorsToSpill))
-        {
-            RemoveColors(colorsToSpill.Count);
-            colorsToSpill.ForEach(color => { flask.colors.Add(color); });
-            return true;
-        }
-        return false;
+        RemoveColors(colorsToSpill.Count);
+        colorsToSpill.ForEach(color => { flask.colors.Add(color); });
     }
 
     public bool IsCleared()
@@ -290,6 +342,36 @@ public class ObjectFlask
             }
         });
         return sameColor;
+    }
+
+    public bool ContainsSameColor(ObjectFlask objectFlask)
+    {
+        bool containsSameColor = true;
+        int i = 0;
+        if (objectFlask.colors.Count == 0 && this.colors.Count == 0)
+        {
+            return true;
+        }
+
+        if (objectFlask.colors.Count == 0 || this.colors.Count == 0)
+        {
+            return false;
+        }
+
+        if (objectFlask.colors.Count != this.colors.Count)
+        {
+            return false;
+        }
+
+        while (containsSameColor && i < this.colors.Count)
+        {
+            if (!objectFlask.colors[i].Equals(this.colors[i]))
+            {
+                containsSameColor = false;
+            }
+            i += 1;
+        }
+        return containsSameColor;
     }
 
     public bool IsEmpty()
