@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Unity.Netcode;
 
-public class Flask : MonoBehaviour
+public class Flask : NetworkBehaviour
 {
     public Material material;
     public Material clearedMaterial;
