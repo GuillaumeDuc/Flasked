@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class AnimFlask : MonoBehaviour
 {
+    public float spillingYOffset = 3;
+    public float spillingXOffset = 2;
     public float selectedPositionHeight = .5f;
     private float rotationAngle = -60f, defaultAngle = 0;
     private Flask flask;
@@ -43,7 +45,7 @@ public class AnimFlask : MonoBehaviour
     {
         // Init variables
         this.targetFlask = targetFlask;
-        this.targetPosition = new Vector3(targetFlask.gameObject.transform.position.x - 2f, targetFlask.gameObject.transform.position.y + 3f);
+        this.targetPosition = new Vector3(targetFlask.gameObject.transform.position.x - spillingXOffset, targetFlask.gameObject.transform.position.y + spillingYOffset);
 
         // Change order contents & flask
         flask.SetOrderMoving();

@@ -68,18 +68,18 @@ public class SystemManager : MonoBehaviour
     void Init()
     {
         // Create flasks GameObjects
-        flasks = FlaskCreator.CreateFlasks(flaskPrefab, Store.level, Store.nbContent, Store.nbEmptyFlask, contentHeight);
+        flasks = FlaskCreator.CreateFlasks(flaskPrefab, FlaskCreator.GetNbFlask(Store.level), Store.nbContent, Store.nbEmptyFlask, contentHeight);
 
         // Load save
         if (Store.savedScenes.Count > 0)
         {
             // Load top scenes from saved scenes
-            FlaskCreator.RefillFlask(flasks, Store.savedScenes[Store.savedScenes.Count - 1].ToList(), contentHeight);
+            FlaskCreator.RefillFlasks(flasks, Store.savedScenes[Store.savedScenes.Count - 1].ToList(), contentHeight);
         }
         // Load previously generated next scene
         else if (nextSceneColors.Count > 0)
         {
-            FlaskCreator.RefillFlask(flasks, nextSceneColors, contentHeight);
+            FlaskCreator.RefillFlasks(flasks, nextSceneColors, contentHeight);
             // Init flask data in store
             Store.SaveFlasksBeginLevel(flasks);
             Store.retryCount = nbRetry;
@@ -95,7 +95,7 @@ public class SystemManager : MonoBehaviour
             Store.nbEmptyFlask = nbEmpty;
             List<List<Color>> listColorFlasks = FlaskCreator.GetSolvedRandomFlasks(flasks.Count, Store.nbContent, ref Store.nbEmptyFlask);
             // Fill flasks
-            FlaskCreator.RefillFlask(flasks, listColorFlasks, contentHeight);
+            FlaskCreator.RefillFlasks(flasks, listColorFlasks, contentHeight);
             // Init flask data in store
             Store.SaveFlasksBeginLevel(flasks);
             Store.retryCount = nbRetry;
@@ -161,7 +161,7 @@ public class SystemManager : MonoBehaviour
         });
         if (!isMoving && Store.retryCount > 0)
         {
-            FlaskCreator.RefillFlask(flasks, Store.savedFlasks.ToList(), contentHeight);
+            FlaskCreator.RefillFlasks(flasks, Store.savedFlasks.ToList(), contentHeight);
             Store.RetryScene();
             Store.undoCount = nbUndo;
             SetInfo();
@@ -184,7 +184,7 @@ public class SystemManager : MonoBehaviour
             // Get previous scene 
             List<List<Color>> previousScene = Store.savedScenes[Store.savedScenes.Count - 2].ToList();
             // Set previous scene
-            FlaskCreator.RefillFlask(flasks, previousScene, contentHeight);
+            FlaskCreator.RefillFlasks(flasks, previousScene, contentHeight);
             // Remove current scene
             Store.savedScenes.RemoveAt(Store.savedScenes.Count - 1);
             Store.undoCount -= 1;

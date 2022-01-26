@@ -7,9 +7,6 @@ public class MenuManager : MonoBehaviour
     public Button SingleplayerButton;
     public Button MultiplayerButton;
 
-    const string SingleplayerScene = "SingleplayerScene";
-    const string ServerScene = "ServerScene";
-
     void Start()
     {
         SingleplayerButton.onClick.AddListener(LoadSingleplayer);
@@ -18,11 +15,11 @@ public class MenuManager : MonoBehaviour
 
     void LoadSingleplayer()
     {
-        SceneManager.LoadScene(SingleplayerScene);
+        SceneManager.LoadScene(Scenes.SingleplayerScene.ToString());
     }
 
     void LoadMultiplayer()
     {
-        SceneManager.LoadScene(ServerScene);
+        SceneManager.LoadScene(Scenes.ServerScene.ToString());
     }
 }

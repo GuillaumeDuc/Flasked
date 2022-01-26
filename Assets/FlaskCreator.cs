@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public static class FlaskCreator
 {
@@ -45,17 +46,34 @@ public static class FlaskCreator
         {
             GameObject.DestroyImmediate(flasks[i].gameObject);
         }
+        flasks = new List<Flask>();
     }
 
-    public static List<Flask> CreateFlasks(GameObject prefab, int level, int nbContent, int nbEmpty, float contentHeight)
+    public static void DeleteFlasks(List<NetworkFlask> flasks)
+    {
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            GameObject.DestroyImmediate(flasks[i].gameObject);
+        }
+        flasks = new List<NetworkFlask>();
+    }
+
+    public static List<Flask> CreateFlasks(
+        GameObject prefab,
+        int nbFlask,
+        int nbContent,
+        int nbEmpty,
+        float contentHeight,
+        float minX = .2f,
+        float maxX = .8f,
+        float xStep = .08f,
+        float yStep = .45f,
+        float maxHeight = .65f,
+        float spillingYOffset = 3,
+        float spillingXOffset = 2
+        )
     {
         List<Flask> flasks = new List<Flask>();
-        int nbFlask = GetNbFlask(level);
-        float xStep = .08f;
-        float yStep = .45f;
-        float minX = .2f;
-        float maxX = 1 - minX;
-        float maxHeight = .65f;
         Vector3 pos = new Vector3(minX, maxHeight, 10);
 
         for (int i = 0; i < nbFlask; i++)
@@ -67,6 +85,11 @@ public static class FlaskCreator
             {
                 pos = new Vector3(minX, pos.y - yStep, pos.z);
             }
+            // Set offset when spilling
+            AnimFlask anim = flaskGO.GetComponent<AnimFlask>();
+            anim.spillingYOffset = spillingYOffset;
+            anim.spillingXOffset = spillingXOffset;
+
             Flask flask = flaskGO.GetComponent<Flask>();
             flasks.Add(flask);
             flask.InitFlask(8 + i, nbContent);
@@ -123,7 +146,12 @@ public static class FlaskCreator
         return 4 + ((int)(level / 3) * 2);
     }
 
-    public static void RefillFlask(List<Flask> flasks, List<List<Color>> savedList, float height)
+    public static int GetNbFlaskMultiplayer(int level)
+    {
+        return 4 + (level * 3);
+    }
+
+    public static void RefillFlasks(List<Flask> flasks, List<List<Color>> savedList, float height)
     {
         // Remove content and add new content
         for (int i = 0; i < flasks.Count; i++)

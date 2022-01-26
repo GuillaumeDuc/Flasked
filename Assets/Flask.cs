@@ -8,13 +8,13 @@ public class Flask : NetworkBehaviour
 {
     public Material material;
     public Material clearedMaterial;
-
-    private int maxSize = 4;
     public float contentHeight = 1;
     public int nbPoints = 5;
+
+    protected int maxSize = 4;
     private List<Color> colors = new List<Color>();
     private bool selected = false;
-    private AnimFlask animFlask;
+    protected AnimFlask animFlask;
     private bool clearedState = false;
 
     public void AddColor(Color color, float height)
@@ -81,6 +81,11 @@ public class Flask : NetworkBehaviour
         }
     }
 
+    public int GetLayerContainer()
+    {
+        return GetComponentInChildren<Container>().gameObject.layer;
+    }
+
     public bool EqualsTopColor(Flask flask)
     {
         // Empty flask return true
@@ -96,11 +101,11 @@ public class Flask : NetworkBehaviour
         return false;
     }
 
-    public bool CanSpill(Flask flask, List<Color> colorsToSpill)
+    public bool CanSpill(Flask flask)
     {
         return !this.Equals(flask) &&
         flask != null &&
-        HasEnoughSpace(flask, colorsToSpill) &&
+        HasEnoughSpace(flask, PopColors()) &&
         EqualsTopColor(flask) &&
         !IsEmpty() &&
         !IsMoving() &&
@@ -137,7 +142,7 @@ public class Flask : NetworkBehaviour
     {
         List<Color> colorsToSpill = this.PopColors();
         // Spill only when not in own flask, if flask is not null, if space is enough, if both top color match
-        if (CanSpill(flask, colorsToSpill))
+        if (CanSpill(flask))
         {
             // Play animation
             animFlask.SpillAnimation(flask);

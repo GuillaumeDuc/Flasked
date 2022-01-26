@@ -178,7 +178,8 @@ public class ContentFlask : MonoBehaviour
             {
                 hit = Physics2D.Raycast(transformedPoint, direction, 100, layerMask);
             }
-            if (hit.collider != null)
+            // Only hit container's flask, not others container's (multiplayer)
+            if (hit.collider != null && hit.collider.gameObject == GetComponentInParent<Container>().gameObject)
             {
                 res[i] = (hit.point - origin);
             }
