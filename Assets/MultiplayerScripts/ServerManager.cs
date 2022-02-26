@@ -17,6 +17,8 @@ public class ServerManager : MonoBehaviour
     public GameObject MultiplayerStorePrefab;
     public Text hostFlaskCurrentLvText;
     public Text clientFlaskCurrentLvText;
+    public GameObject levelHost;
+    public GameObject levelClient;
     public GameObject endPanelHost;
     public GameObject endPanelClient;
     public Button RetryHostButton;
@@ -27,6 +29,7 @@ public class ServerManager : MonoBehaviour
     private List<NetworkFlask> clientFlasks = new List<NetworkFlask>();
     private MultiplayerStore multiplayerStore;
     private List<(NetworkFlask, NetworkFlask)> listWaitingSpill = new List<(NetworkFlask, NetworkFlask)>();
+    private bool clientClear = false, hostClear = false;
     float minX = .05f;
     float maxX = .48f;
     float xStep = .055f;
@@ -178,11 +181,19 @@ public class ServerManager : MonoBehaviour
             {
                 if (isClient)
                 {
+                    clientClear = true;
+
+                    levelClient.SetActive(false);
+                    clientFlaskCurrentLvText.gameObject.SetActive(false);
                     endPanelClient.SetActive(true);
                     multiplayerStore.ClearedUIClientRPC(isClient);
                 }
                 else
                 {
+                    hostClear = true;
+
+                    levelHost.SetActive(false);
+                    hostFlaskCurrentLvText.gameObject.SetActive(false);
                     endPanelHost.SetActive(true);
                     multiplayerStore.ClearedUIClientRPC(isClient);
                 }
@@ -247,8 +258,14 @@ public class ServerManager : MonoBehaviour
                             if (NetworkManager.Singleton.IsHost)
                             {
                                 // Spilled, try to go to next scene
-                                TryNextLevel(ref hostFlasks, ref multiplayerStore.hostLv);
-                                TryNextLevel(ref clientFlasks, ref multiplayerStore.clientLv, true);
+                                if (!hostClear)
+                                {
+                                    TryNextLevel(ref hostFlasks, ref multiplayerStore.hostLv);
+                                }
+                                if (!clientClear)
+                                {
+                                    TryNextLevel(ref clientFlasks, ref multiplayerStore.clientLv, true);
+                                }
                             }
                         }
                     }
@@ -298,8 +315,14 @@ public class ServerManager : MonoBehaviour
                 if (NetworkManager.Singleton.IsHost)
                 {
                     // Spilled, try to go to next scene
-                    TryNextLevel(ref hostFlasks, ref multiplayerStore.hostLv);
-                    TryNextLevel(ref clientFlasks, ref multiplayerStore.clientLv, true);
+                    if (!hostClear)
+                    {
+                        TryNextLevel(ref hostFlasks, ref multiplayerStore.hostLv);
+                    }
+                    if (!clientClear)
+                    {
+                        TryNextLevel(ref clientFlasks, ref multiplayerStore.clientLv, true);
+                    }
                 }
             }
         }
