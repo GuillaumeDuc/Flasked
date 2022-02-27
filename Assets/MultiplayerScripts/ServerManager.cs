@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
-
+using System.Linq;
 
 public class ServerManager : MonoBehaviour
 {
@@ -30,6 +30,7 @@ public class ServerManager : MonoBehaviour
     private MultiplayerStore multiplayerStore;
     private List<(NetworkFlask, NetworkFlask)> listWaitingSpill = new List<(NetworkFlask, NetworkFlask)>();
     private bool clientClear = false, hostClear = false;
+    private bool shouldResize = false;
     float minX = .05f;
     float maxX = .48f;
     float xStep = .055f;
@@ -138,6 +139,11 @@ public class ServerManager : MonoBehaviour
         listWaitingSpill.Add((giver, receiver));
     }
 
+    public void SetShouldResize(bool shouldResize)
+    {
+        this.shouldResize = shouldResize;
+    }
+
     List<List<List<Color>>> GetListScene()
     {
         List<List<List<Color>>> scenes = new List<List<List<Color>>>();
@@ -157,6 +163,8 @@ public class ServerManager : MonoBehaviour
         FlaskCreator.DeleteFlasks(flasks);
         // Recreate and respawn flasks
         CreateFlasks(ref flasks, isClient);
+        // Resize Client Screen
+        multiplayerStore.ResizeCameraClientRPC();
     }
 
     void TryNextLevel(ref List<NetworkFlask> flasks, ref NetworkVariable<int> currentLv, bool isClient = false)
@@ -220,6 +228,31 @@ public class ServerManager : MonoBehaviour
     public void SetMultiplayerStore(MultiplayerStore multiplayerStore)
     {
         this.multiplayerStore = multiplayerStore;
+    }
+
+    public bool ResizeScreen()
+    {
+        List<NetworkFlask> flasks = new List<NetworkFlask>(FindObjectsOfType<NetworkFlask>());
+        NetworkFlask maxFlask = null, minFlask = null;
+        flasks.ForEach(flask =>
+        {
+            if (maxFlask == null || flask.gameObject.transform.position.x > maxFlask.gameObject.transform.position.x)
+            {
+                maxFlask = flask;
+            }
+            if (minFlask == null || flask.gameObject.transform.position.x < minFlask.gameObject.transform.position.x)
+            {
+                minFlask = flask;
+            }
+        });
+        float maxPosCamera = Camera.main.WorldToViewportPoint(maxFlask.transform.position).x;
+        float minPosCamera = Camera.main.WorldToViewportPoint(minFlask.transform.position).x;
+        if (maxPosCamera > .5f + maxX || minPosCamera < minX)
+        {
+            Camera.main.orthographicSize += 0.01f;
+            return true;
+        }
+        return false;
     }
 
     void Update()
@@ -325,6 +358,12 @@ public class ServerManager : MonoBehaviour
                     }
                 }
             }
+        }
+
+        // Resizing screen to display all flasks
+        if (shouldResize)
+        {
+            shouldResize = ResizeScreen();
         }
     }
 }

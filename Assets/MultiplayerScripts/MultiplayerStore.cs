@@ -71,6 +71,13 @@ public class MultiplayerStore : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    public void ResizeCameraClientRPC()
+    {
+        if (IsOwner) return;
+        serverManager?.SetShouldResize(true);
+    }
+
     void InitUI()
     {
         // Init Levels
@@ -87,7 +94,11 @@ public class MultiplayerStore : NetworkBehaviour
         {
             serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC());
             serverManager.RetryHostButton.gameObject.SetActive(false);
+
+            // Resize Client Screen
+            serverManager.SetShouldResize(true);
         }
+
     }
 
     void Start()
