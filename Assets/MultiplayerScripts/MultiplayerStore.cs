@@ -5,14 +5,13 @@ using Unity.Netcode;
 
 public class MultiplayerStore : NetworkBehaviour
 {
-    public NetworkVariable<int> nbRetry,
-        nbUndo = new NetworkVariable<int>(),
-        host = new NetworkVariable<int>(),
-        hostLv = new NetworkVariable<int>(0),
+    public NetworkVariable<int> hostLv = new NetworkVariable<int>(0),
         clientLv = new NetworkVariable<int>(0);
 
     public ServerManager serverManager;
     private bool serverManagerFound = false;
+    private Color[] initColors;
+    private bool initIsClient;
 
     void UpdateLvClientChanged(int prevInt, int nextInt)
     {
@@ -72,10 +71,24 @@ public class MultiplayerStore : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void ResizeCameraClientRPC()
+    public void CreateFlasksClientRPC(Color[] colors, bool isClient = false)
     {
         if (IsOwner) return;
-        serverManager?.SetShouldResize(true);
+        if (serverManagerFound)
+        {
+            int flasksCount = isClient ? serverManager.clientFlasks.Count : serverManager.hostFlasks.Count;
+            int nbEmpty = serverManager.nbEmpty;
+            Debug.Log("color create" + colors.Length);
+            serverManager.CreateFlasks(FlaskCreator.UnflattenArray(colors, flasksCount, nbEmpty, serverManager.nbContent), isClient);
+        }
+        else 
+        {
+            Debug.Log("color" + colors.Length);
+            // Wait for server manager to be found
+            initColors = new Color[colors.Length];
+            initColors = colors;
+            initIsClient = isClient;
+        }
     }
 
     void InitUI()
@@ -94,11 +107,20 @@ public class MultiplayerStore : NetworkBehaviour
         {
             serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC());
             serverManager.RetryHostButton.gameObject.SetActive(false);
-
-            // Resize Client Screen
-            serverManager.SetShouldResize(true);
         }
+    }
 
+    void InitFlasks()
+    {
+        if (!NetworkManager.Singleton.IsHost)
+        {
+            if (initColors != null) 
+            {
+                int flasksCount = initIsClient ? serverManager.clientFlasks.Count : serverManager.hostFlasks.Count;
+                int nbEmpty = serverManager.nbEmpty;
+                serverManager.CreateFlasks(FlaskCreator.UnflattenArray(initColors, flasksCount, nbEmpty, serverManager.nbContent), initIsClient);
+            }
+        }
     }
 
     void Start()
@@ -119,6 +141,7 @@ public class MultiplayerStore : NetworkBehaviour
                 serverManagerFound = true;
                 serverManager.SetMultiplayerStore(this);
                 InitUI();
+                InitFlasks();
             }
         }
     }

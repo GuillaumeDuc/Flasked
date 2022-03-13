@@ -23,14 +23,13 @@ public class ServerManager : MonoBehaviour
     public GameObject endPanelClient;
     public Button RetryHostButton;
     public Button RetryClientButton;
-    private NetworkFlask selectedFlask;
-    private List<List<List<Color>>> scenes = new List<List<List<Color>>>();
-    private List<NetworkFlask> hostFlasks = new List<NetworkFlask>();
-    private List<NetworkFlask> clientFlasks = new List<NetworkFlask>();
+    private Flask selectedFlask;
+    private List<Color[][]> scenes = new List<Color[][]>();
+    public List<Flask> hostFlasks = new List<Flask>();
+    public List<Flask> clientFlasks = new List<Flask>();
     private MultiplayerStore multiplayerStore;
-    private List<(NetworkFlask, NetworkFlask)> listWaitingSpill = new List<(NetworkFlask, NetworkFlask)>();
+    private List<(Flask, Flask)> listWaitingSpill = new List<(Flask, Flask)>();
     private bool clientClear = false, hostClear = false;
-    private bool shouldResize = false;
     float minX = .05f;
     float maxX = .48f;
     float xStep = .055f;
@@ -52,8 +51,12 @@ public class ServerManager : MonoBehaviour
     {
         InitMultiplayerStore();
 
-        CreateFlasks(ref hostFlasks);
-        CreateFlasks(ref clientFlasks, true);
+        CreateFlasks(scenes[multiplayerStore.hostLv.Value]);
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]));
+
+        CreateFlasks(scenes[multiplayerStore.clientLv.Value], true);
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]), true);
+
     }
 
     void InitMultiplayerStore()
@@ -61,26 +64,9 @@ public class ServerManager : MonoBehaviour
         GameObject go = Instantiate(MultiplayerStorePrefab);
         go.GetComponent<NetworkObject>().Spawn();
         multiplayerStore = go.GetComponent<MultiplayerStore>();
-        multiplayerStore.nbRetry.Value = nbRetry;
-        multiplayerStore.nbUndo.Value = nbUndo;
     }
 
-    void SaveLevel(List<List<List<Color>>> level, List<NetworkFlask> flasks)
-    {
-        level.Add(GetListFromFlasks(flasks));
-    }
-
-    List<List<Color>> GetListFromFlasks(List<NetworkFlask> flasks)
-    {
-        List<List<Color>> list = new List<List<Color>>();
-        flasks.ForEach(flask =>
-        {
-            list.Add(new List<Color>(flask.GetColors()));
-        });
-        return list;
-    }
-
-    void CreateFlasks(ref List<NetworkFlask> list, bool isClient = false)
+    public void CreateFlasks(Color[][] colors, bool isClient = false)
     {
         float offsetX = isClient ? .5f : 0;
         // Spawn flasks
@@ -98,25 +84,18 @@ public class ServerManager : MonoBehaviour
             spillingYOffset,
             spillingXOffset
         );
-        List<List<Color>> listColorFlasks = scenes[isClient ? multiplayerStore.clientLv.Value : multiplayerStore.hostLv.Value];
         // Fill client flasks
-        FlaskCreator.RefillFlasks(flasks, listColorFlasks, contentHeight);
-        list = flasks.ConvertAll(x => { return (NetworkFlask)x; });
-        SpawnFlasks(list, isClient);
-    }
-
-    void SpawnFlasks(List<NetworkFlask> flasks, bool isClient = false)
-    {
-        // Spawn on server and Init Client flasks
-        flasks.ForEach(flask =>
+        FlaskCreator.RefillFlasks(flasks, colors, contentHeight);
+        if (isClient) 
         {
-            flask.GetComponent<NetworkObject>().Spawn();
-            flask.InitFlaskClientRPC(flask.GetLayerContainer(), flask.GetMaxSize(), flask.GetColors().ToArray(), isClient);
-            flask.isClientFlask = isClient;
-        });
+            hostFlasks = flasks;
+        } else 
+        {
+            clientFlasks = flasks;
+        }
     }
 
-    public bool SpillBottle(NetworkFlask giver, NetworkFlask receiver)
+    public bool SpillBottle(Flask giver, Flask receiver)
     {
         bool spilled = (giver != null) ? giver.SpillTo(receiver) : false;
         if (spilled)
@@ -134,41 +113,38 @@ public class ServerManager : MonoBehaviour
         return spilled;
     }
 
-    public void AddToWaitingSpillList(NetworkFlask giver, NetworkFlask receiver)
+    public void AddToWaitingSpillList(Flask giver, Flask receiver)
     {
         listWaitingSpill.Add((giver, receiver));
     }
 
-    public void SetShouldResize(bool shouldResize)
+    List<Color[][]> GetListScene()
     {
-        this.shouldResize = shouldResize;
-    }
-
-    List<List<List<Color>>> GetListScene()
-    {
-        List<List<List<Color>>> scenes = new List<List<List<Color>>>();
+        List<Color[][]> scenes = new List<Color[][]>();
         for (int i = 0; i < maxLv; i++)
         {
             List<List<Color>> listColorFlasks = FlaskCreator.GetSolvedRandomFlasks(FlaskCreator.GetNbFlaskMultiplayer(i), nbContent, ref nbEmpty);
-            scenes.Add(listColorFlasks);
+            Color[][] colors = new Color[listColorFlasks.Count][];
+            for(int j = 0; j < listColorFlasks.Count; j++){
+                colors[j] = listColorFlasks[j].ToArray();
+            }
+            scenes.Add(colors);
         }
         return scenes;
     }
 
-    void NextLevel(ref List<NetworkFlask> flasks, bool isClient)
+    void NextLevel(List<Flask> flasks, bool isClient)
     {
-        // Make sure flask is clear before respawning client flasks
-        flasks.ForEach(flask => flask.EmptyFlaskClientRPC());
         // Delete networked flasks
         FlaskCreator.DeleteFlasks(flasks);
         // Recreate and respawn flasks
-        CreateFlasks(ref flasks, isClient);
-        // Resize Client Screen
-        multiplayerStore.ResizeCameraClientRPC();
+        CreateFlasks(scenes[multiplayerStore.clientLv.Value], isClient);
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]), isClient);
     }
 
-    void TryNextLevel(ref List<NetworkFlask> flasks, ref NetworkVariable<int> currentLv, bool isClient = false)
+    void TryNextLevel(ref NetworkVariable<int> currentLv, bool isClient = false)
     {
+        List<Flask> flasks = isClient ? clientFlasks : hostFlasks;
         bool cleared = true;
         flasks.ForEach(flask =>
         {
@@ -183,7 +159,7 @@ public class ServerManager : MonoBehaviour
             if (currentLv.Value < scenes.Count)
             {
                 selectedFlask = null;
-                NextLevel(ref flasks, isClient);
+                NextLevel(flasks, isClient);
             }
             else
             {
@@ -211,16 +187,13 @@ public class ServerManager : MonoBehaviour
 
     public void RetryScene(bool isClient)
     {
-        List<NetworkFlask> flasks = isClient ? clientFlasks : hostFlasks;
+        List<Flask> flasks = isClient ? clientFlasks : hostFlasks;
         int level = isClient ? multiplayerStore.clientLv.Value : multiplayerStore.hostLv.Value;
 
         // Refill flask on host
-        FlaskCreator.RefillFlasks(flasks.ConvertAll(x => { return (Flask)x; }), scenes[level], contentHeight);
+        FlaskCreator.RefillFlasks(flasks, scenes[level], contentHeight);
         // Refill flask on client
-        flasks.ForEach(flask =>
-        {
-            flask.RefillFlaskClientRPC(flask.GetColors().ToArray());
-        });
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[level]), isClient);
         // Reset selected flask
         selectedFlask = null;
     }
@@ -228,31 +201,6 @@ public class ServerManager : MonoBehaviour
     public void SetMultiplayerStore(MultiplayerStore multiplayerStore)
     {
         this.multiplayerStore = multiplayerStore;
-    }
-
-    public bool ResizeScreen()
-    {
-        List<NetworkFlask> flasks = new List<NetworkFlask>(FindObjectsOfType<NetworkFlask>());
-        NetworkFlask maxFlask = null, minFlask = null;
-        flasks.ForEach(flask =>
-        {
-            if (maxFlask == null || flask.gameObject.transform.position.x > maxFlask.gameObject.transform.position.x)
-            {
-                maxFlask = flask;
-            }
-            if (minFlask == null || flask.gameObject.transform.position.x < minFlask.gameObject.transform.position.x)
-            {
-                minFlask = flask;
-            }
-        });
-        float maxPosCamera = Camera.main.WorldToViewportPoint(maxFlask.transform.position).x;
-        float minPosCamera = Camera.main.WorldToViewportPoint(minFlask.transform.position).x;
-        if (maxPosCamera > .5f + maxX || minPosCamera < minX)
-        {
-            Camera.main.orthographicSize += 0.01f;
-            return true;
-        }
-        return false;
     }
 
     void Update()
@@ -265,14 +213,14 @@ public class ServerManager : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 100))
             {
-                NetworkFlask clickedFlask = hit.transform.gameObject.GetComponent<NetworkFlask>();
+                Flask clickedFlask = hit.transform.gameObject.GetComponent<Flask>();
                 bool spilled = false;
                 bool canInteractFlask = false;
                 // GameObject clicked is flask and is not moving
                 if (clickedFlask != null && !clickedFlask.IsMoving())
                 {
                     // Cannot interact with others host/client flask
-                    canInteractFlask = NetworkManager.Singleton.IsHost ? !clickedFlask.isClientFlask : clickedFlask.isClientFlask;
+                    canInteractFlask = NetworkManager.Singleton.IsHost ? hostFlasks.Contains(clickedFlask) : clientFlasks.Contains(clickedFlask);
 
                     // Flask clicked is not already selected and selected flask is not filling
                     bool selectedIsFilling = selectedFlask == null ? false : selectedFlask.IsFilling();
@@ -293,11 +241,11 @@ public class ServerManager : MonoBehaviour
                                 // Spilled, try to go to next scene
                                 if (!hostClear)
                                 {
-                                    TryNextLevel(ref hostFlasks, ref multiplayerStore.hostLv);
+                                    TryNextLevel(ref multiplayerStore.hostLv);
                                 }
                                 if (!clientClear)
                                 {
-                                    TryNextLevel(ref clientFlasks, ref multiplayerStore.clientLv, true);
+                                    TryNextLevel(ref multiplayerStore.clientLv, true);
                                 }
                             }
                         }
@@ -350,20 +298,14 @@ public class ServerManager : MonoBehaviour
                     // Spilled, try to go to next scene
                     if (!hostClear)
                     {
-                        TryNextLevel(ref hostFlasks, ref multiplayerStore.hostLv);
+                        TryNextLevel(ref multiplayerStore.hostLv);
                     }
                     if (!clientClear)
                     {
-                        TryNextLevel(ref clientFlasks, ref multiplayerStore.clientLv, true);
+                        TryNextLevel(ref multiplayerStore.clientLv, true);
                     }
                 }
             }
-        }
-
-        // Resizing screen to display all flasks
-        if (shouldResize)
-        {
-            shouldResize = ResizeScreen();
         }
     }
 }

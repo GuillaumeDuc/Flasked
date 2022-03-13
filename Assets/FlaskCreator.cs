@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using System.Linq;
 
 public static class FlaskCreator
 {
@@ -158,6 +159,48 @@ public static class FlaskCreator
         {
             flasks[i].Clear();
             flasks[i].FillWithList(savedList[i], height);
+        }
+    }
+
+    public static Color[] FlattenArray(Color[][] colors)
+    {
+        int size = colors.Length;
+        List<Color> result = new List<Color>();
+        
+        for (int i = 0; i < size; i++)
+        {
+            for (int z = 0; z < colors[i].Length; z++)
+            {
+                result.Add(colors[i][z]);
+            }
+        }
+        return result.ToArray();
+    }
+
+    public static Color[][] UnflattenArray(Color[] colors, int nbFlasks, int nbEmpty, int nbContent)
+    {
+        int size = colors.Length;
+        List<Color[]> result = new List<Color[]>();
+        List<Color> temp = new List<Color>(colors);
+
+        for(int i = 0; i < nbFlasks; i++)
+        {
+            if (temp.Count > nbFlasks) 
+            {
+                result.Add(temp.Take(nbFlasks).ToArray());
+                temp = new List<Color>(temp.Skip(nbFlasks));
+            }
+        }
+        return result.ToArray();
+    }
+
+    public static void RefillFlasks(List<Flask> flasks, Color[][] savedList, float height)
+    {
+        // Remove content and add new content
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            flasks[i].Clear();
+            flasks[i].FillWithList(new List<Color>(savedList[i]), height);
         }
     }
 
