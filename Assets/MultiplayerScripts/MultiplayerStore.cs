@@ -12,6 +12,7 @@ public class MultiplayerStore : NetworkBehaviour
     private bool serverManagerFound = false;
     private Color[] initColors;
     private bool initIsClient;
+    private int initNbContent, initNbFlask;
 
     void UpdateLvClientChanged(int prevInt, int nextInt)
     {
@@ -71,23 +72,22 @@ public class MultiplayerStore : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void CreateFlasksClientRPC(Color[] colors, bool isClient = false)
+    public void CreateFlasksClientRPC(Color[] colors, int flasksCount, int nbContent, bool isClient = false)
     {
         if (IsOwner) return;
         if (serverManagerFound)
         {
-            int flasksCount = isClient ? serverManager.clientFlasks.Count : serverManager.hostFlasks.Count;
-            int nbEmpty = serverManager.nbEmpty;
-            Debug.Log("color create" + colors.Length);
-            serverManager.CreateFlasks(FlaskCreator.UnflattenArray(colors, flasksCount, nbEmpty, serverManager.nbContent), isClient);
+            List<Flask> flasks = isClient ? serverManager.clientFlasks : serverManager.hostFlasks;
+            serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), isClient);
         }
-        else 
+        else
         {
-            Debug.Log("color" + colors.Length);
             // Wait for server manager to be found
             initColors = new Color[colors.Length];
             initColors = colors;
             initIsClient = isClient;
+            initNbContent = nbContent;
+            initNbFlask = flasksCount;
         }
     }
 
@@ -114,11 +114,10 @@ public class MultiplayerStore : NetworkBehaviour
     {
         if (!NetworkManager.Singleton.IsHost)
         {
-            if (initColors != null) 
+            if (initColors != null)
             {
-                int flasksCount = initIsClient ? serverManager.clientFlasks.Count : serverManager.hostFlasks.Count;
-                int nbEmpty = serverManager.nbEmpty;
-                serverManager.CreateFlasks(FlaskCreator.UnflattenArray(initColors, flasksCount, nbEmpty, serverManager.nbContent), initIsClient);
+                List<Flask> flasks = initIsClient ? serverManager.clientFlasks : serverManager.hostFlasks;
+                serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), initIsClient);
             }
         }
     }

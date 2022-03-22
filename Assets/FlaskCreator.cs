@@ -166,7 +166,7 @@ public static class FlaskCreator
     {
         int size = colors.Length;
         List<Color> result = new List<Color>();
-        
+
         for (int i = 0; i < size; i++)
         {
             for (int z = 0; z < colors[i].Length; z++)
@@ -177,21 +177,24 @@ public static class FlaskCreator
         return result.ToArray();
     }
 
-    public static Color[][] UnflattenArray(Color[] colors, int nbFlasks, int nbEmpty, int nbContent)
+    public static Color[][] UnflattenArray(Color[] colors, int nbFlasks, int nbContent)
     {
-        int size = colors.Length;
-        List<Color[]> result = new List<Color[]>();
-        List<Color> temp = new List<Color>(colors);
+        int count = 0;
+        Color[][] res = new Color[nbFlasks][];
 
-        for(int i = 0; i < nbFlasks; i++)
+        for (int i = 0; i < nbFlasks; i++)
         {
-            if (temp.Count > nbFlasks) 
+            res[i] = new Color[nbContent];
+            for (int j = 0; j < nbContent; j++)
             {
-                result.Add(temp.Take(nbFlasks).ToArray());
-                temp = new List<Color>(temp.Skip(nbFlasks));
+                if (count < colors.Length)
+                {
+                    res[i][j] = colors[count];
+                }
+                count += 1;
             }
         }
-        return result.ToArray();
+        return res;
     }
 
     public static void RefillFlasks(List<Flask> flasks, Color[][] savedList, float height)
@@ -200,7 +203,10 @@ public static class FlaskCreator
         for (int i = 0; i < flasks.Count; i++)
         {
             flasks[i].Clear();
-            flasks[i].FillWithList(new List<Color>(savedList[i]), height);
+            if (i < savedList.Length)
+            {
+                flasks[i].FillWithList(new List<Color>(savedList[i]), height);
+            }
         }
     }
 

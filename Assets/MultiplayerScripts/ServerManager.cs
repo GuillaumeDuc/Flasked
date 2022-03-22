@@ -51,12 +51,11 @@ public class ServerManager : MonoBehaviour
     {
         InitMultiplayerStore();
 
-        CreateFlasks(scenes[multiplayerStore.hostLv.Value]);
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]));
+        CreateFlasks(ref hostFlasks, scenes[multiplayerStore.hostLv.Value]);
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.hostLv.Value]), hostFlasks.Count, nbContent);
 
-        CreateFlasks(scenes[multiplayerStore.clientLv.Value], true);
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]), true);
-
+        CreateFlasks(ref clientFlasks, scenes[multiplayerStore.clientLv.Value], true);
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]), clientFlasks.Count, nbContent, true);
     }
 
     void InitMultiplayerStore()
@@ -66,11 +65,11 @@ public class ServerManager : MonoBehaviour
         multiplayerStore = go.GetComponent<MultiplayerStore>();
     }
 
-    public void CreateFlasks(Color[][] colors, bool isClient = false)
+    public void CreateFlasks(ref List<Flask> flasks, Color[][] colors, bool isClient = false)
     {
         float offsetX = isClient ? .5f : 0;
         // Spawn flasks
-        List<Flask> flasks = FlaskCreator.CreateFlasks(
+        flasks = FlaskCreator.CreateFlasks(
             flaskPrefab,
             FlaskCreator.GetNbFlaskMultiplayer(isClient ? multiplayerStore.clientLv.Value : multiplayerStore.hostLv.Value),
             nbContent,
@@ -86,13 +85,6 @@ public class ServerManager : MonoBehaviour
         );
         // Fill client flasks
         FlaskCreator.RefillFlasks(flasks, colors, contentHeight);
-        if (isClient) 
-        {
-            hostFlasks = flasks;
-        } else 
-        {
-            clientFlasks = flasks;
-        }
     }
 
     public bool SpillBottle(Flask giver, Flask receiver)
@@ -125,7 +117,8 @@ public class ServerManager : MonoBehaviour
         {
             List<List<Color>> listColorFlasks = FlaskCreator.GetSolvedRandomFlasks(FlaskCreator.GetNbFlaskMultiplayer(i), nbContent, ref nbEmpty);
             Color[][] colors = new Color[listColorFlasks.Count][];
-            for(int j = 0; j < listColorFlasks.Count; j++){
+            for (int j = 0; j < listColorFlasks.Count; j++)
+            {
                 colors[j] = listColorFlasks[j].ToArray();
             }
             scenes.Add(colors);
@@ -138,8 +131,10 @@ public class ServerManager : MonoBehaviour
         // Delete networked flasks
         FlaskCreator.DeleteFlasks(flasks);
         // Recreate and respawn flasks
-        CreateFlasks(scenes[multiplayerStore.clientLv.Value], isClient);
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]), isClient);
+        Color[][] colorsScene = isClient ? scenes[multiplayerStore.clientLv.Value] : scenes[multiplayerStore.hostLv.Value];
+        CreateFlasks(ref flasks, colorsScene, isClient);
+        int nbFlasks = isClient ? clientFlasks.Count : hostFlasks.Count;
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(colorsScene), nbFlasks, nbContent, isClient);
     }
 
     void TryNextLevel(ref NetworkVariable<int> currentLv, bool isClient = false)
@@ -193,7 +188,7 @@ public class ServerManager : MonoBehaviour
         // Refill flask on host
         FlaskCreator.RefillFlasks(flasks, scenes[level], contentHeight);
         // Refill flask on client
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[level]), isClient);
+        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[level]), flasks.Count, nbContent, isClient);
         // Reset selected flask
         selectedFlask = null;
     }
