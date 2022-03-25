@@ -11,7 +11,6 @@ public class MultiplayerStore : NetworkBehaviour
     public ServerManager serverManager;
     private bool serverManagerFound = false;
     private Color[] initColors;
-    private bool initIsClient;
     private int initNbContent, initNbFlask;
 
     void UpdateLvClientChanged(int prevInt, int nextInt)
@@ -41,7 +40,7 @@ public class MultiplayerStore : NetworkBehaviour
     {
         if (nrGiver.TryGet(out NetworkObject networkObjectFlaskGiver) && nrReceiver.TryGet(out NetworkObject networkObjectFlaskReceiver))
         {
-            serverManager.AddToWaitingSpillList(networkObjectFlaskGiver.GetComponent<NetworkFlask>(), networkObjectFlaskReceiver.GetComponent<NetworkFlask>());
+            serverManager.AddToWaitingSpillList(networkObjectFlaskGiver.GetComponent<Flask>(), networkObjectFlaskReceiver.GetComponent<Flask>());
         }
     }
 
@@ -52,7 +51,7 @@ public class MultiplayerStore : NetworkBehaviour
 
         if (nrGiver.TryGet(out NetworkObject networkObjectFlaskGiver) && nrReceiver.TryGet(out NetworkObject networkObjectFlaskReceiver))
         {
-            serverManager.AddToWaitingSpillList(networkObjectFlaskGiver.GetComponent<NetworkFlask>(), networkObjectFlaskReceiver.GetComponent<NetworkFlask>());
+            serverManager.AddToWaitingSpillList(networkObjectFlaskGiver.GetComponent<Flask>(), networkObjectFlaskReceiver.GetComponent<Flask>());
         }
     }
 
@@ -80,15 +79,17 @@ public class MultiplayerStore : NetworkBehaviour
             List<Flask> flasks = isClient ? serverManager.clientFlasks : serverManager.hostFlasks;
             serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), isClient);
         }
-        else
-        {
-            // Wait for server manager to be found
-            initColors = new Color[colors.Length];
-            initColors = colors;
-            initIsClient = isClient;
-            initNbContent = nbContent;
-            initNbFlask = flasksCount;
-        }
+    }
+
+    
+    [ClientRpc]
+    public void InitAllFlasksClientRPC(Color[] colors, int flasksCount, int nbContent)
+    {
+        // Wait for server manager to be found
+        initColors = new Color[colors.Length];
+        initColors = colors;
+        initNbContent = nbContent;
+        initNbFlask = flasksCount;
     }
 
     void InitUI()
@@ -116,8 +117,8 @@ public class MultiplayerStore : NetworkBehaviour
         {
             if (initColors != null)
             {
-                List<Flask> flasks = initIsClient ? serverManager.clientFlasks : serverManager.hostFlasks;
-                serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), initIsClient);
+                serverManager.CreateFlasks(ref serverManager.hostFlasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent));
+                serverManager.CreateFlasks(ref serverManager.clientFlasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), true);
             }
         }
     }

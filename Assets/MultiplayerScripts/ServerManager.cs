@@ -52,10 +52,8 @@ public class ServerManager : MonoBehaviour
         InitMultiplayerStore();
 
         CreateFlasks(ref hostFlasks, scenes[multiplayerStore.hostLv.Value]);
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.hostLv.Value]), hostFlasks.Count, nbContent);
-
         CreateFlasks(ref clientFlasks, scenes[multiplayerStore.clientLv.Value], true);
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.clientLv.Value]), clientFlasks.Count, nbContent, true);
+        multiplayerStore.InitAllFlasksClientRPC(FlaskCreator.FlattenArray(scenes[multiplayerStore.hostLv.Value]), hostFlasks.Count, nbContent);
     }
 
     void InitMultiplayerStore()

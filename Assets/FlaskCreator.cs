@@ -50,15 +50,6 @@ public static class FlaskCreator
         flasks = new List<Flask>();
     }
 
-    public static void DeleteFlasks(List<NetworkFlask> flasks)
-    {
-        for (int i = 0; i < flasks.Count; i++)
-        {
-            GameObject.DestroyImmediate(flasks[i].gameObject);
-        }
-        flasks = new List<NetworkFlask>();
-    }
-
     public static List<Flask> CreateFlasks(
         GameObject prefab,
         int nbFlask,
