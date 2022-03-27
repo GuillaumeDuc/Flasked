@@ -171,9 +171,10 @@ public static class FlaskCreator
     public static Color[][] UnflattenArray(Color[] colors, int nbFlasks, int nbContent)
     {
         int count = 0;
-        Color[][] res = new Color[nbFlasks][];
+        int nbEmpty = (nbContent * nbFlasks - colors.Length) / nbContent;
+        Color[][] res = new Color[nbFlasks - nbEmpty][];
 
-        for (int i = 0; i < nbFlasks; i++)
+        for (int i = 0; i < nbFlasks - nbEmpty; i++)
         {
             res[i] = new Color[nbContent];
             for (int j = 0; j < nbContent; j++)

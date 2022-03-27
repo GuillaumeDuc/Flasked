@@ -7,11 +7,11 @@ public class MultiplayerStore : NetworkBehaviour
 {
     public NetworkVariable<int> hostLv = new NetworkVariable<int>(0),
         clientLv = new NetworkVariable<int>(0);
-
     public ServerManager serverManager;
     private bool serverManagerFound = false;
     private Color[] initColors;
     private int initNbContent, initNbFlask;
+    public int nbPlayers, posClient;
 
     void UpdateLvClientChanged(int prevInt, int nextInt)
     {
@@ -32,27 +32,20 @@ public class MultiplayerStore : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RetrySceneServerRPC()
     {
-        serverManager.RetryScene(true);
+        serverManager.RetryScene(NetworkManager.Singleton.LocalClientId);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void SpillBottleServerRPC(NetworkObjectReference nrGiver, NetworkObjectReference nrReceiver)
+    public void SpillBottleServerRPC(int posGiver, int posReceiver, int posPlayer)
     {
-        if (nrGiver.TryGet(out NetworkObject networkObjectFlaskGiver) && nrReceiver.TryGet(out NetworkObject networkObjectFlaskReceiver))
-        {
-            serverManager.AddToWaitingSpillList(networkObjectFlaskGiver.GetComponent<Flask>(), networkObjectFlaskReceiver.GetComponent<Flask>());
-        }
+        serverManager.AddToWaitingSpillList(posGiver, posReceiver, posPlayer);
     }
 
     [ClientRpc]
-    public void SpillBottleClientRPC(NetworkObjectReference nrGiver, NetworkObjectReference nrReceiver)
+    public void SpillBottleClientRPC(int posGiver, int posReceiver, int posPlayer)
     {
         if (IsOwner) return;
-
-        if (nrGiver.TryGet(out NetworkObject networkObjectFlaskGiver) && nrReceiver.TryGet(out NetworkObject networkObjectFlaskReceiver))
-        {
-            serverManager.AddToWaitingSpillList(networkObjectFlaskGiver.GetComponent<Flask>(), networkObjectFlaskReceiver.GetComponent<Flask>());
-        }
+        serverManager.AddToWaitingSpillList(posGiver, posReceiver, posPlayer);
     }
 
     [ClientRpc]
@@ -71,20 +64,23 @@ public class MultiplayerStore : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void CreateFlasksClientRPC(Color[] colors, int flasksCount, int nbContent, bool isClient = false)
+    public void CreateFlasksClientRPC(Color[] colors, int flasksCount, int nbContent, int posPlayer)
     {
         if (IsOwner) return;
         if (serverManagerFound)
         {
-            List<Flask> flasks = isClient ? serverManager.clientFlasks : serverManager.hostFlasks;
-            serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), isClient);
+            List<Flask> flasks = serverManager.players[posPlayer].flasks;
+            serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), posPlayer);
         }
     }
 
     
     [ClientRpc]
-    public void InitAllFlasksClientRPC(Color[] colors, int flasksCount, int nbContent)
+    public void InitAllFlasksClientRPC(Color[] colors, int flasksCount, int nbContent, int posClient, int nbPlayers, ClientRpcParams clientRpcParams = default)
     {
+        if (IsOwner) return;
+        this.nbPlayers = nbPlayers;
+        this.posClient = posClient;
         // Wait for server manager to be found
         initColors = new Color[colors.Length];
         initColors = colors;
@@ -101,7 +97,7 @@ public class MultiplayerStore : NetworkBehaviour
         // Init buttons listener
         if (NetworkManager.Singleton.IsHost)
         {
-            serverManager.RetryHostButton.onClick.AddListener(() => serverManager.RetryScene(false));
+            serverManager.RetryHostButton.onClick.AddListener(() => serverManager.RetryScene(NetworkManager.Singleton.LocalClientId));
             serverManager.RetryClientButton.gameObject.SetActive(false);
         }
         else if (NetworkManager.Singleton.IsClient)
@@ -117,8 +113,12 @@ public class MultiplayerStore : NetworkBehaviour
         {
             if (initColors != null)
             {
-                serverManager.CreateFlasks(ref serverManager.hostFlasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent));
-                serverManager.CreateFlasks(ref serverManager.clientFlasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), true);
+                for(int i = 0; i < nbPlayers; i++)
+                {
+                    Player p = new Player();
+                    serverManager.players.Add(p);
+                    serverManager.CreateFlasks(ref p.flasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), i);
+                }
             }
         }
     }
