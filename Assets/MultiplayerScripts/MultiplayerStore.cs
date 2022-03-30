@@ -30,9 +30,9 @@ public class MultiplayerStore : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void RetrySceneServerRPC()
+    public void RetrySceneServerRPC(ulong clientId)
     {
-        serverManager.RetryScene(NetworkManager.Singleton.LocalClientId);
+        serverManager.RetryScene(clientId);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -74,7 +74,15 @@ public class MultiplayerStore : NetworkBehaviour
         }
     }
 
-    
+    [ClientRpc]
+    public void RefillFlasksClientRPC(Color[] colors, float contentHeight)
+    {
+        List<Flask> flasks = serverManager.players[posClient].flasks;
+        Color[][] newColors = FlaskCreator.UnflattenArray(colors, flasks.Count, serverManager.nbContent);
+        // Refill flask on host
+        FlaskCreator.RefillFlasks(flasks, newColors, contentHeight);
+    }
+
     [ClientRpc]
     public void InitAllFlasksClientRPC(Color[] colors, int flasksCount, int nbContent, int posClient, int nbPlayers, ClientRpcParams clientRpcParams = default)
     {
@@ -102,7 +110,7 @@ public class MultiplayerStore : NetworkBehaviour
         }
         else if (NetworkManager.Singleton.IsClient)
         {
-            serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC());
+            serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC(NetworkManager.Singleton.LocalClientId));
             serverManager.RetryHostButton.gameObject.SetActive(false);
         }
     }
@@ -113,7 +121,7 @@ public class MultiplayerStore : NetworkBehaviour
         {
             if (initColors != null)
             {
-                for(int i = 0; i < nbPlayers; i++)
+                for (int i = 0; i < nbPlayers; i++)
                 {
                     Player p = new Player();
                     serverManager.players.Add(p);

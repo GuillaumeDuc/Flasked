@@ -153,6 +153,19 @@ public static class FlaskCreator
         }
     }
 
+    public static void RefillFlasks(List<Flask> flasks, Color[][] savedList, float height)
+    {
+        // Remove content and add new content
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            flasks[i].Clear();
+            if (i < savedList.Length)
+            {
+                flasks[i].FillWithList(new List<Color>(savedList[i]), height);
+            }
+        }
+    }
+
     public static Color[] FlattenArray(Color[][] colors)
     {
         int size = colors.Length;
@@ -187,19 +200,6 @@ public static class FlaskCreator
             }
         }
         return res;
-    }
-
-    public static void RefillFlasks(List<Flask> flasks, Color[][] savedList, float height)
-    {
-        // Remove content and add new content
-        for (int i = 0; i < flasks.Count; i++)
-        {
-            flasks[i].Clear();
-            if (i < savedList.Length)
-            {
-                flasks[i].FillWithList(new List<Color>(savedList[i]), height);
-            }
-        }
     }
 
     public static List<List<Color>> GetSolvedRandomFlasks(int size, int nbContent, ref int nbEmpty)

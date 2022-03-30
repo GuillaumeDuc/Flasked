@@ -232,7 +232,7 @@ public class ServerManager : MonoBehaviour
         // Refill flask on host
         FlaskCreator.RefillFlasks(flasks, scenes[level], contentHeight);
         // Refill flask on client
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(scenes[level]), flasks.Count, nbContent, level);
+        multiplayerStore.RefillFlasksClientRPC(FlaskCreator.FlattenArray(scenes[level]), contentHeight);
         // Reset selected flask
         selectedFlask = null;
     }
@@ -263,10 +263,6 @@ public class ServerManager : MonoBehaviour
                 // GameObject clicked is flask and is not moving
                 if (clickedFlask != null && !clickedFlask.IsMoving())
                 {
-                    clickedFlask.GetColors().ForEach(color =>
-                    {
-                        Debug.Log(color);
-                    });
                     // Cannot interact with others host/client flask
                     if (NetworkManager.Singleton.IsHost)
                     {
