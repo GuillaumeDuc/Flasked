@@ -4,6 +4,7 @@ public class Player
 {
     public List<Flask> flasks;
     public ulong playerId;
+    public int level;
 
     public Player(ulong playerId)
     {

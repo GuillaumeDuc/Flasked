@@ -5,8 +5,6 @@ using Unity.Netcode;
 
 public class MultiplayerStore : NetworkBehaviour
 {
-    public NetworkVariable<int> hostLv = new NetworkVariable<int>(0),
-        clientLv = new NetworkVariable<int>(0);
     public ServerManager serverManager;
     private bool serverManagerFound = false;
     private Color[] initColors;
@@ -69,15 +67,17 @@ public class MultiplayerStore : NetworkBehaviour
         if (IsOwner) return;
         if (serverManagerFound)
         {
-            List<Flask> flasks = serverManager.players[posPlayer].flasks;
-            serverManager.CreateFlasks(ref flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), posPlayer);
+            Player player = serverManager.players[posPlayer];
+            FlaskCreator.DeleteFlasks(player.flasks);
+            serverManager.CreateFlasks(ref player.flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), player);
         }
     }
 
     [ClientRpc]
-    public void RefillFlasksClientRPC(Color[] colors, float contentHeight)
+    public void RefillFlasksClientRPC(Color[] colors, int pos, float contentHeight)
     {
-        List<Flask> flasks = serverManager.players[posClient].flasks;
+        if (IsOwner) return;
+        List<Flask> flasks = serverManager.players[pos].flasks;
         Color[][] newColors = FlaskCreator.UnflattenArray(colors, flasks.Count, serverManager.nbContent);
         // Refill flask on host
         FlaskCreator.RefillFlasks(flasks, newColors, contentHeight);
@@ -99,8 +99,8 @@ public class MultiplayerStore : NetworkBehaviour
     void InitUI()
     {
         // Init Levels
-        serverManager.hostFlaskCurrentLvText.text = "" + (hostLv.Value + 1);
-        serverManager.clientFlaskCurrentLvText.text = "" + (clientLv.Value + 1);
+        // serverManager.hostFlaskCurrentLvText.text = "" + (serverManager.players[posClient].level + 1);
+        // serverManager.clientFlaskCurrentLvText.text = "" + (serverManager.players[posClient].level + 1);
 
         // Init buttons listener
         if (NetworkManager.Singleton.IsHost)
@@ -125,17 +125,10 @@ public class MultiplayerStore : NetworkBehaviour
                 {
                     Player p = new Player();
                     serverManager.players.Add(p);
-                    serverManager.CreateFlasks(ref p.flasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), i);
+                    serverManager.CreateFlasks(ref p.flasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), p);
                 }
             }
         }
-    }
-
-    void Start()
-    {
-        // Listen for changes
-        hostLv.OnValueChanged += UpdateLvHostChanged;
-        clientLv.OnValueChanged += UpdateLvClientChanged;
     }
 
     void Update()
