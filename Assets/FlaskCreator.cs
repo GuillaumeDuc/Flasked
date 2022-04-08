@@ -58,6 +58,7 @@ public static class FlaskCreator
         float contentHeight,
         float minX = .2f,
         float maxX = .8f,
+        float minY = 0,
         float xStep = .08f,
         float yStep = .45f,
         float maxHeight = .65f,
@@ -66,7 +67,7 @@ public static class FlaskCreator
         )
     {
         List<Flask> flasks = new List<Flask>();
-        Vector3 pos = new Vector3(minX, maxHeight, 10);
+        Vector3 pos = new Vector3(minX, maxHeight - minY, 10);
 
         for (int i = 0; i < nbFlask; i++)
         {

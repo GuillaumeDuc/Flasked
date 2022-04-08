@@ -83,7 +83,10 @@ public class ServerManager : MonoBehaviour
 
     public void CreateFlasks(ref List<Flask> flasks, Color[][] colors, Player p)
     {
-        float offsetX = .5f * players.FindIndex(player => player == p);
+        int pos = players.FindIndex(player => player == p);
+        float offsetX = GetOffsetX(pos);
+        float offsetY = GetOffsetY(pos);
+
         // Spawn flasks
         flasks = FlaskCreator.CreateFlasks(
             flaskPrefab,
@@ -93,6 +96,7 @@ public class ServerManager : MonoBehaviour
             contentHeight,
             offsetX + minX,
             offsetX + maxX,
+            offsetY,
             xStep,
             yStep,
             maxHeight,
@@ -119,6 +123,20 @@ public class ServerManager : MonoBehaviour
     public int GetPosPlayerServer(ulong playerId)
     {
         return players.FindIndex(player => player.playerId == playerId);
+    }
+
+    float GetOffsetX(int posPlayer)
+    {
+        return posPlayer % 2 == 0 ? 0 : .5f;
+    }
+
+    float GetOffsetY(int posPlayer)
+    {
+        if (posPlayer % 2 != 0)
+        {
+            posPlayer -= 1;
+        }
+        return (((float)posPlayer) * 2) / 10;
     }
 
     public bool SpillBottle(Flask giver, Flask receiver)
