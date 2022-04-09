@@ -194,7 +194,7 @@ public class ServerManager : MonoBehaviour
         Color[][] colorsScene = scenes[p.level];
         CreateFlasks(ref p.flasks, colorsScene, p);
         int nbFlasks = p.flasks.Count;
-        multiplayerStore.CreateFlasksClientRPC(FlaskCreator.FlattenArray(colorsScene), nbFlasks, nbContent, players.FindIndex(player => player == p));
+        multiplayerStore.NextLevelClientRPC(FlaskCreator.FlattenArray(colorsScene), nbFlasks, nbContent, players.FindIndex(player => player == p), p.level);
     }
 
     void TryNextLevelServer(Player p)

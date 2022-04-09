@@ -62,13 +62,14 @@ public class MultiplayerStore : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void CreateFlasksClientRPC(Color[] colors, int flasksCount, int nbContent, int posPlayer)
+    public void NextLevelClientRPC(Color[] colors, int flasksCount, int nbContent, int posPlayer, int newLevel)
     {
         if (IsOwner) return;
         if (serverManagerFound)
         {
             Player player = serverManager.players[posPlayer];
             FlaskCreator.DeleteFlasks(player.flasks);
+            player.level = newLevel;
             serverManager.CreateFlasks(ref player.flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), player);
         }
     }
