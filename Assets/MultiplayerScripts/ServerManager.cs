@@ -141,28 +141,30 @@ public class ServerManager : MonoBehaviour
 
     public bool SpillBottle(Flask giver, Flask receiver)
     {
-        bool spilled = (giver != null) ? giver.SpillTo(receiver) : false;
-        if (spilled)
+        if (NetworkManager.Singleton.IsHost)
         {
-            if (NetworkManager.Singleton.IsHost)
-            {
-                multiplayerStore.SpillBottleClientRPC(
-                    GetPosFlaskServer(giver),
-                    GetPosFlaskServer(receiver),
-                    GetPosPlayerServer(NetworkManager.Singleton.LocalClientId)
-                );
-            }
-            else if (NetworkManager.Singleton.IsClient)
+            bool spilled = (giver != null) ? giver.SpillTo(receiver) : false;
+            multiplayerStore.SpillBottleClientRPC(
+                GetPosFlaskServer(giver),
+                GetPosFlaskServer(receiver),
+                GetPosPlayerServer(NetworkManager.Singleton.LocalClientId)
+            );
+            return spilled;
+        }
+        else if (NetworkManager.Singleton.IsClient)
+        {
+            if (giver != null && giver.CanSpill(receiver))
             {
                 multiplayerStore.SpillBottleServerRPC(
                     GetPosFlaskClient(giver),
                     GetPosFlaskClient(receiver),
                     multiplayerStore.posClient
                 );
+                return true;
             }
+            return false;
         }
-
-        return spilled;
+        return false;
     }
 
     public void AddToWaitingSpillList(int giver, int receiver, int posPlayer)

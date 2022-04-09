@@ -36,7 +36,10 @@ public class MultiplayerStore : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SpillBottleServerRPC(int posGiver, int posReceiver, int posPlayer)
     {
+        // Play on server
         serverManager.AddToWaitingSpillList(posGiver, posReceiver, posPlayer);
+        // Play on all clients
+        SpillBottleClientRPC(posGiver, posReceiver, posPlayer);
     }
 
     [ClientRpc]
