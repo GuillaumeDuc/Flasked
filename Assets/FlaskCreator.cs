@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using System.Linq;
 
 public static class FlaskCreator
 {
@@ -49,15 +50,6 @@ public static class FlaskCreator
         flasks = new List<Flask>();
     }
 
-    public static void DeleteFlasks(List<NetworkFlask> flasks)
-    {
-        for (int i = 0; i < flasks.Count; i++)
-        {
-            GameObject.DestroyImmediate(flasks[i].gameObject);
-        }
-        flasks = new List<NetworkFlask>();
-    }
-
     public static List<Flask> CreateFlasks(
         GameObject prefab,
         int nbFlask,
@@ -66,6 +58,7 @@ public static class FlaskCreator
         float contentHeight,
         float minX = .2f,
         float maxX = .8f,
+        float minY = 0,
         float xStep = .08f,
         float yStep = .45f,
         float maxHeight = .65f,
@@ -74,7 +67,7 @@ public static class FlaskCreator
         )
     {
         List<Flask> flasks = new List<Flask>();
-        Vector3 pos = new Vector3(minX, maxHeight, 10);
+        Vector3 pos = new Vector3(minX, maxHeight - minY, 10);
 
         for (int i = 0; i < nbFlask; i++)
         {
@@ -159,6 +152,55 @@ public static class FlaskCreator
             flasks[i].Clear();
             flasks[i].FillWithList(savedList[i], height);
         }
+    }
+
+    public static void RefillFlasks(List<Flask> flasks, Color[][] savedList, float height)
+    {
+        // Remove content and add new content
+        for (int i = 0; i < flasks.Count; i++)
+        {
+            flasks[i].Clear();
+            if (i < savedList.Length)
+            {
+                flasks[i].FillWithList(new List<Color>(savedList[i]), height);
+            }
+        }
+    }
+
+    public static Color[] FlattenArray(Color[][] colors)
+    {
+        int size = colors.Length;
+        List<Color> result = new List<Color>();
+
+        for (int i = 0; i < size; i++)
+        {
+            for (int z = 0; z < colors[i].Length; z++)
+            {
+                result.Add(colors[i][z]);
+            }
+        }
+        return result.ToArray();
+    }
+
+    public static Color[][] UnflattenArray(Color[] colors, int nbFlasks, int nbContent)
+    {
+        int count = 0;
+        int nbEmpty = (nbContent * nbFlasks - colors.Length) / nbContent;
+        Color[][] res = new Color[nbFlasks - nbEmpty][];
+
+        for (int i = 0; i < nbFlasks - nbEmpty; i++)
+        {
+            res[i] = new Color[nbContent];
+            for (int j = 0; j < nbContent; j++)
+            {
+                if (count < colors.Length)
+                {
+                    res[i][j] = colors[count];
+                }
+                count += 1;
+            }
+        }
+        return res;
     }
 
     public static List<List<Color>> GetSolvedRandomFlasks(int size, int nbContent, ref int nbEmpty)

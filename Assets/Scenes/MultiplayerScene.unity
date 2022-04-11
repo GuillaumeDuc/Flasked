@@ -592,7 +592,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 13
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1718,15 +1718,11 @@ MonoBehaviour:
   nbContent: 4
   contentHeight: 1
   nbEmpty: 1
-  nbRetry: 3
-  nbUndo: 5
   maxLv: 5
-  flaskPrefab: {fileID: 8970504783772890327, guid: b497fe849cb1c3e4e908638a841e8c13, type: 3}
+  flaskPrefab: {fileID: 5964938345780577467, guid: 572c1354d1c078848bc2604ff487d12c, type: 3}
   MultiplayerStorePrefab: {fileID: 5391595981462655929, guid: ff83c6b03081929488c5b46d741d4773, type: 3}
   hostFlaskCurrentLvText: {fileID: 503017774}
   clientFlaskCurrentLvText: {fileID: 1734129941}
-  levelHost: {fileID: 1500705738}
-  levelClient: {fileID: 2062693805}
   endPanelHost: {fileID: 1503320640}
   endPanelClient: {fileID: 573424655}
   RetryHostButton: {fileID: 1008429068}
