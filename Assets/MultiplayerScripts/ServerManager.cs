@@ -28,8 +28,8 @@ public class ServerManager : MonoBehaviour
     float minX = .05f;
     float maxX = .48f;
     float xStep = .055f;
-    float yStep = .4f;
-    float maxHeight = .7f;
+    float yStep = .2f;
+    float maxHeight = .75f;
     float spillingYOffset = 2;
     float spillingXOffset = 1.75f;
 
@@ -136,7 +136,7 @@ public class ServerManager : MonoBehaviour
         {
             posPlayer -= 1;
         }
-        return (((float)posPlayer) * 2) / 10;
+        return (float)posPlayer / 4.7f;
     }
 
     public bool SpillBottle(Flask giver, Flask receiver)
