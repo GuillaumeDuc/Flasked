@@ -9,6 +9,7 @@ public class MultiplayerStore : NetworkBehaviour
     private bool serverManagerFound = false;
     private Color[] initColors;
     private int initNbContent, initNbFlask;
+    private float screenSize, yStep, maxHeight;
     public int nbPlayers, posClient;
 
     void UpdateLvClientChanged(int prevInt, int nextInt)
@@ -24,6 +25,22 @@ public class MultiplayerStore : NetworkBehaviour
         if (serverManagerFound)
         {
             serverManager.hostFlaskCurrentLvText.text = "" + (nextInt + 1);
+        }
+    }
+
+    [ClientRpc]
+    public void SetScreenConfigClientRPC(float screenSize, float yStep, float maxHeight)
+    {
+        if (IsHost) return;
+        if (serverManagerFound)
+        {
+            serverManager.SetScreenConfig(screenSize, yStep, maxHeight);
+        }
+        else
+        {
+            this.screenSize = screenSize;
+            this.yStep = yStep;
+            this.maxHeight = maxHeight;
         }
     }
 
@@ -114,6 +131,11 @@ public class MultiplayerStore : NetworkBehaviour
         }
         else if (NetworkManager.Singleton.IsClient)
         {
+            // Set screensize if initialized
+            if (screenSize != 0)
+            {
+                serverManager.SetScreenConfig(screenSize, yStep, maxHeight);
+            }
             serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC(NetworkManager.Singleton.LocalClientId));
             serverManager.RetryHostButton.gameObject.SetActive(false);
         }

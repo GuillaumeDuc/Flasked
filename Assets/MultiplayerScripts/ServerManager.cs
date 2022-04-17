@@ -33,6 +33,11 @@ public class ServerManager : MonoBehaviour
     float spillingYOffset = 2;
     float spillingXOffset = 1.75f;
 
+
+    float orthographicSize2P = 7;
+    float yStep2P = .4f;
+    float maxHeight2P = .65f;
+
     void Start()
     {
         if (NetworkManager.Singleton.IsHost)
@@ -46,6 +51,8 @@ public class ServerManager : MonoBehaviour
     {
         // Init store
         InitMultiplayerStore();
+        // Change screen config depending on nb players
+        SetScreenConfigServer(NetworkManager.Singleton.ConnectedClientsIds.Count);
         // Init players
         for (int i = 0; i < NetworkManager.Singleton.ConnectedClientsIds.Count; i++)
         {
@@ -137,6 +144,22 @@ public class ServerManager : MonoBehaviour
             posPlayer -= 1;
         }
         return (float)posPlayer / 4.7f;
+    }
+
+    void SetScreenConfigServer(int nbPlayers)
+    {
+        if (nbPlayers < 3)
+        {
+            SetScreenConfig(orthographicSize2P, yStep2P, maxHeight2P);
+            multiplayerStore.SetScreenConfigClientRPC(orthographicSize2P, yStep2P, maxHeight2P);
+        }
+    }
+
+    public void SetScreenConfig(float screenSize, float yStep, float maxHeight)
+    {
+        Camera.main.orthographicSize = screenSize;
+        this.yStep = yStep;
+        this.maxHeight = maxHeight;
     }
 
     public bool SpillBottle(Flask giver, Flask receiver)
