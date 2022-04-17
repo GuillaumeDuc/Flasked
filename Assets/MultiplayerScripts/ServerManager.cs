@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
+using UnityEngine.Rendering.Universal;
 using System.Linq;
 
 public class ServerManager : MonoBehaviour
@@ -21,6 +22,8 @@ public class ServerManager : MonoBehaviour
     public Button RetryClientButton;
     private Flask selectedFlask;
     private List<Color[][]> scenes = new List<Color[][]>();
+    public Light2D light1P, light2P;
+    [HideInInspector]
     public List<Player> players = new List<Player>();
     private MultiplayerStore multiplayerStore;
     private List<(int, int, int)> listWaitingSpill = new List<(int, int, int)>();
@@ -33,7 +36,8 @@ public class ServerManager : MonoBehaviour
     float spillingYOffset = 2;
     float spillingXOffset = 1.75f;
 
-
+    float lightXOffset2P = 7;
+    float lightOuterAngle2P = 6;
     float orthographicSize2P = 7;
     float yStep2P = .4f;
     float maxHeight2P = .65f;
@@ -150,16 +154,25 @@ public class ServerManager : MonoBehaviour
     {
         if (nbPlayers < 3)
         {
-            SetScreenConfig(orthographicSize2P, yStep2P, maxHeight2P);
-            multiplayerStore.SetScreenConfigClientRPC(orthographicSize2P, yStep2P, maxHeight2P);
+            SetScreenConfig(orthographicSize2P, yStep2P, maxHeight2P, lightOuterAngle2P, lightXOffset2P);
+            multiplayerStore.SetScreenConfigClientRPC(orthographicSize2P, yStep2P, maxHeight2P, lightOuterAngle2P, lightXOffset2P);
         }
     }
 
-    public void SetScreenConfig(float screenSize, float yStep, float maxHeight)
+    public void ChangeLights(float lightOuterAngle, float lightXOffset)
+    {
+        light1P.pointLightOuterRadius = lightOuterAngle;
+        light1P.transform.position = new Vector3(-lightXOffset, light1P.transform.position.y, light1P.transform.position.z);
+        light2P.pointLightOuterRadius = lightOuterAngle;
+        light2P.transform.position = new Vector3(lightXOffset, light2P.transform.position.y, light2P.transform.position.z);
+    }
+
+    public void SetScreenConfig(float screenSize, float yStep, float maxHeight, float lightOuterAngle, float lightXOffset)
     {
         Camera.main.orthographicSize = screenSize;
         this.yStep = yStep;
         this.maxHeight = maxHeight;
+        ChangeLights(lightOuterAngle, lightXOffset);
     }
 
     public bool SpillBottle(Flask giver, Flask receiver)

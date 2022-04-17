@@ -9,7 +9,7 @@ public class MultiplayerStore : NetworkBehaviour
     private bool serverManagerFound = false;
     private Color[] initColors;
     private int initNbContent, initNbFlask;
-    private float screenSize, yStep, maxHeight;
+    private float screenSize, yStep, maxHeight, lightOuterAngle, lightXOffset;
     public int nbPlayers, posClient;
 
     void UpdateLvClientChanged(int prevInt, int nextInt)
@@ -29,18 +29,20 @@ public class MultiplayerStore : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SetScreenConfigClientRPC(float screenSize, float yStep, float maxHeight)
+    public void SetScreenConfigClientRPC(float screenSize, float yStep, float maxHeight, float lightOuterAngle, float lightXOffset)
     {
         if (IsHost) return;
         if (serverManagerFound)
         {
-            serverManager.SetScreenConfig(screenSize, yStep, maxHeight);
+            serverManager.SetScreenConfig(screenSize, yStep, maxHeight, lightOuterAngle, lightXOffset);
         }
         else
         {
             this.screenSize = screenSize;
             this.yStep = yStep;
             this.maxHeight = maxHeight;
+            this.lightOuterAngle = lightOuterAngle;
+            this.lightXOffset = lightXOffset;
         }
     }
 
@@ -134,7 +136,7 @@ public class MultiplayerStore : NetworkBehaviour
             // Set screensize if initialized
             if (screenSize != 0)
             {
-                serverManager.SetScreenConfig(screenSize, yStep, maxHeight);
+                serverManager.SetScreenConfig(screenSize, yStep, maxHeight, lightOuterAngle, lightXOffset);
             }
             serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC(NetworkManager.Singleton.LocalClientId));
             serverManager.RetryHostButton.gameObject.SetActive(false);
