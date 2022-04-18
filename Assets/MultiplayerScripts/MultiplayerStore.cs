@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.UI;
 
 public class MultiplayerStore : NetworkBehaviour
 {
@@ -11,22 +12,6 @@ public class MultiplayerStore : NetworkBehaviour
     private int initNbContent, initNbFlask;
     private float screenSize, yStep, maxHeight, lightOuterAngle, lightXOffset;
     public int nbPlayers, posClient;
-
-    void UpdateLvClientChanged(int prevInt, int nextInt)
-    {
-        if (serverManagerFound)
-        {
-            serverManager.clientFlaskCurrentLvText.text = "" + (nextInt + 1);
-        }
-    }
-
-    void UpdateLvHostChanged(int prevInt, int nextInt)
-    {
-        if (serverManagerFound)
-        {
-            serverManager.hostFlaskCurrentLvText.text = "" + (nextInt + 1);
-        }
-    }
 
     [ClientRpc]
     public void SetScreenConfigClientRPC(float screenSize, float yStep, float maxHeight, float lightOuterAngle, float lightXOffset)
@@ -92,6 +77,7 @@ public class MultiplayerStore : NetworkBehaviour
             Player player = serverManager.players[posPlayer];
             FlaskCreator.DeleteFlasks(player.flasks);
             player.level = newLevel;
+            player.UpdateLevelUI();
             serverManager.CreateFlasks(ref player.flasks, FlaskCreator.UnflattenArray(colors, flasksCount, serverManager.nbContent), player);
         }
     }
@@ -121,36 +107,52 @@ public class MultiplayerStore : NetworkBehaviour
 
     void InitUI()
     {
-        // Init Levels
-        // serverManager.hostFlaskCurrentLvText.text = "" + (serverManager.players[posClient].level + 1);
-        // serverManager.clientFlaskCurrentLvText.text = "" + (serverManager.players[posClient].level + 1);
-
-        // Init buttons listener
-        if (NetworkManager.Singleton.IsHost)
+        for (int i = 0; i < serverManager.players.Count; i++)
         {
-            serverManager.RetryHostButton.onClick.AddListener(() => serverManager.RetryScene(NetworkManager.Singleton.LocalClientId));
-            serverManager.RetryClientButton.gameObject.SetActive(false);
+            GameObject go = Instantiate(
+                serverManager.LevelResetDisplay,
+                Camera.main.ViewportToScreenPoint(new Vector3((serverManager.GetOffsetX(i) + .18f) / 2, -(serverManager.GetOffsetY(i) + .06f) / 2.4f, 0)),
+                serverManager.LevelResetDisplay.transform.rotation
+            );
+            go.transform.SetParent(serverManager.Canvas.transform, false);
+            serverManager.players[i].UI = go;
+
+            // Update level UI
+            serverManager.players[i].UpdateLevelUI();
+
+            // Reset button listener on current player
+            if (posClient == i)
+            {
+                if (NetworkManager.Singleton.IsHost)
+                {
+                    go.GetComponentInChildren<Button>().onClick.AddListener(() => serverManager.RetryScene(NetworkManager.Singleton.LocalClientId));
+                }
+                else if (NetworkManager.Singleton.IsClient)
+                {
+                    go.GetComponentInChildren<Button>().onClick.AddListener(() => RetrySceneServerRPC(NetworkManager.Singleton.LocalClientId));
+                }
+            }
+            else // Hide reset button for other players
+            {
+                serverManager.players[i].HideButton();
+            }
         }
-        else if (NetworkManager.Singleton.IsClient)
+    }
+
+    void InitPlayers()
+    {
+        if (!NetworkManager.Singleton.IsHost)
         {
             // Set screensize if initialized
             if (screenSize != 0)
             {
                 serverManager.SetScreenConfig(screenSize, yStep, maxHeight, lightOuterAngle, lightXOffset);
             }
-            serverManager.RetryClientButton.onClick.AddListener(() => RetrySceneServerRPC(NetworkManager.Singleton.LocalClientId));
-            serverManager.RetryHostButton.gameObject.SetActive(false);
-        }
-    }
-
-    void InitFlasks()
-    {
-        if (!NetworkManager.Singleton.IsHost)
-        {
             if (initColors != null)
             {
                 for (int i = 0; i < nbPlayers; i++)
                 {
+                    // Init flasks
                     Player p = new Player();
                     serverManager.players.Add(p);
                     serverManager.CreateFlasks(ref p.flasks, FlaskCreator.UnflattenArray(initColors, initNbFlask, initNbContent), p);
@@ -169,8 +171,8 @@ public class MultiplayerStore : NetworkBehaviour
             {
                 serverManagerFound = true;
                 serverManager.SetMultiplayerStore(this);
+                InitPlayers();
                 InitUI();
-                InitFlasks();
             }
         }
     }

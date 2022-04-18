@@ -14,25 +14,22 @@ public class ServerManager : MonoBehaviour
     public int maxLv = 5;
     public GameObject flaskPrefab;
     public GameObject MultiplayerStorePrefab;
-    public Text hostFlaskCurrentLvText;
-    public Text clientFlaskCurrentLvText;
     public GameObject endPanelHost;
     public GameObject endPanelClient;
-    public Button RetryHostButton;
-    public Button RetryClientButton;
+    public Light2D light1P, light2P;
+    public GameObject LevelResetDisplay;
+    public GameObject Canvas;
     private Flask selectedFlask;
     private List<Color[][]> scenes = new List<Color[][]>();
-    public Light2D light1P, light2P;
     [HideInInspector]
     public List<Player> players = new List<Player>();
     private MultiplayerStore multiplayerStore;
     private List<(int, int, int)> listWaitingSpill = new List<(int, int, int)>();
-    private bool clientClear = false, hostClear = false;
     float minX = .05f;
     float maxX = .48f;
     float xStep = .055f;
     float yStep = .2f;
-    float maxHeight = .75f;
+    float maxHeight = .8f;
     float spillingYOffset = 2;
     float spillingXOffset = 1.75f;
 
@@ -136,18 +133,18 @@ public class ServerManager : MonoBehaviour
         return players.FindIndex(player => player.playerId == playerId);
     }
 
-    float GetOffsetX(int posPlayer)
+    public float GetOffsetX(int posPlayer)
     {
         return posPlayer % 2 == 0 ? 0 : .5f;
     }
 
-    float GetOffsetY(int posPlayer)
+    public float GetOffsetY(int posPlayer)
     {
         if (posPlayer % 2 != 0)
         {
             posPlayer -= 1;
         }
-        return (float)posPlayer / 4.7f;
+        return (float)posPlayer / 4f;
     }
 
     void SetScreenConfigServer(int nbPlayers)
@@ -232,6 +229,8 @@ public class ServerManager : MonoBehaviour
         Color[][] colorsScene = scenes[p.level];
         CreateFlasks(ref p.flasks, colorsScene, p);
         int nbFlasks = p.flasks.Count;
+        // Update UI
+        p.UpdateLevelUI();
         multiplayerStore.NextLevelClientRPC(FlaskCreator.FlattenArray(colorsScene), nbFlasks, nbContent, players.FindIndex(player => player == p), p.level);
     }
 
@@ -254,7 +253,7 @@ public class ServerManager : MonoBehaviour
                 selectedFlask = null;
                 NextLevelServer(p);
             }
-            else
+            else // Won
             {
                 // UI
                 /*
